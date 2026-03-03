@@ -6,6 +6,7 @@ interface Repo {
   name: string;
   description: string | null;
   html_url: string;
+  created_at: string;
 }
 
 export function Projects() {
@@ -16,13 +17,16 @@ export function Projects() {
   useEffect(() => {
     const fetchRepos = async () => {
       try {
-        const response = await fetch('https://api.github.com/users/Steven404/repos?q=sort:created-asc');
+        const response = await fetch('https://api.github.com/users/Steven404/repos?q=sort:created-desc');
         if (!response.ok) {
           throw new Error('Failed to fetch repositories');
         }
-        const data = await response.json();
+        const data: Repo[] = await response.json();
+        const sortedRepos = data.sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
         // Limit to 6 repos for cleaner display
-        setRepos(data.slice(0, 6));
+        setRepos(sortedRepos.slice(0, 6));
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {

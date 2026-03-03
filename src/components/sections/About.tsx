@@ -18,17 +18,23 @@ export function About() {
     <section id="about" className="pt-24 bg-gray-800/50">
       <div className="container mx-auto px-4 max-w-5xl">
         <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-white">
-          About me
+          Who am I?
         </h2>
 
+        <p className="text-center text-gray-300 mb-12 text-xl md:text-2xl">
+          I'm a young and passionate <strong>Software Engineer</strong>.
+        </p>
 
         <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-start">
           <div className="space-y-6">
-            <p className="text-gray-300 text-xl leading-relaxed">
-              With almost 5 years of experience as a front end and full stack software engineer, I specialize in developing fully functional web and mobile applications from start to finish. I strive to create modular and <strong>maintainable</strong> projects that implement cutting edge technologies and practices
+            <p className="text-gray-300 text-xl leading-relaxed ">
+              With almost 5 years of experience as a front end and full stack software engineer, I specialize in developing fully functional web and mobile applications from start to finish. I strive to create modular and <strong>maintainable</strong> projects that implement cutting edge technologies and practices.
             </p>
-            <p className="text-gray-300 text-lg leading-relaxed">
+            <p className="text-gray-300 text-md leading-relaxed">
               Shortly before graduating, I started my journey as a developer and have been learning and creating ever since.
+            </p>
+            <p className="text-gray-300 text-xl leading-relaxed ">
+               Lately I've been focusing on bulding React Native apps with <strong>offline-first UX</strong>, <strong>fast performance</strong> and <strong className='italic'>scalable coding practices</strong>.
             </p>
           </div>
 
@@ -47,7 +53,7 @@ export function About() {
           </div>
         </div>
       </div>
-      <div className="mt-24 bg-gray-800 flex items-center justify-center py-12 w-full">
+      <div className="mt-24 bg-gray-800 flex items-center justify-center py-12 w-full max-md:px-4">
         <p className="text-gray-100 text-center text-2xl">
           Always on the look for new projects and opportunities to grow from
         </p>

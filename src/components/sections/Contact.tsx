@@ -3,19 +3,13 @@ import { Github, Linkedin, Mail, Phone, Copy, Check } from 'lucide-react';
 
 export function Contact() {
   const [copiedEmail, setCopiedEmail] = useState(false);
-  const [copiedPhone, setCopiedPhone] = useState(false);
 
   const email = "stefanosmichelakis@gmail.com";
 
-  const handleCopy = (text: string, type: 'email' | 'phone') => {
+  const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
-    if (type === 'email') {
-      setCopiedEmail(true);
-      setTimeout(() => setCopiedEmail(false), 2000);
-    } else {
-      setCopiedPhone(true);
-      setTimeout(() => setCopiedPhone(false), 2000);
-    }
+    setCopiedEmail(true);
+    setTimeout(() => setCopiedEmail(false), 2000);
   };
 
   return (
@@ -26,13 +20,13 @@ export function Contact() {
         </h2>
 
         <p className="text-gray-400 text-lg mb-12 leading-relaxed">
-          Although I'm not currently looking for any new opportunities, my inbox is always open.
+          My inbox is always open.
           Whether you have a question or just want to say hi, I'll try my best to get back to you!
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center mb-10">
           <button
-            onClick={() => handleCopy(email, 'email')}
+            onClick={() => handleCopy(email)}
             className="flex items-center justify-between w-full sm:w-auto min-w-[240px] px-6 py-4 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-xl transition-colors border border-gray-800 shadow-sm gap-2"
           >
             <span className="flex items-center gap-3">
@@ -47,7 +41,7 @@ export function Contact() {
 
         <div className="flex items-center justify-center gap-6">
           <a
-            href="https://github.com"
+            href="https://github.com/Steven404"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-white transition-colors p-2"
@@ -56,7 +50,7 @@ export function Contact() {
             <Github size={28} />
           </a>
           <a
-            href="https://linkedin.com"
+            href="https://www.linkedin.com/in/stefanos-michelakis-65884b230/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-white transition-colors p-2"

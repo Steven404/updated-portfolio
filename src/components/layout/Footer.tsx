@@ -16,10 +16,6 @@ export function Footer() {
             <span className="sr-only">LinkedIn</span>
             LinkedIn
           </a>
-          <a href="#" className="text-gray-400 hover:text-white transition-colors">
-            <span className="sr-only">Twitter</span>
-            Twitter
-          </a>
         </div>
       </div>
     </footer>

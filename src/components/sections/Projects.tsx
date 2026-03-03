@@ -6,7 +6,12 @@ interface Repo {
   name: string;
   description: string | null;
   html_url: string;
-  created_at: string;
+}
+
+interface PinnedRepoResponse {
+  repo: string;
+  name: string;
+  description: string | null;
 }
 
 export function Projects() {
@@ -17,16 +22,23 @@ export function Projects() {
   useEffect(() => {
     const fetchRepos = async () => {
       try {
-        const response = await fetch('https://api.github.com/users/Steven404/repos?q=sort:created-desc');
-        if (!response.ok) {
-          throw new Error('Failed to fetch repositories');
+        const pinnedResponse = await fetch('https://pinned.berrysauce.dev/get/Steven404');
+        const allReposResponse = await fetch('https://api.github.com/users/Steven404/repos');
+        if (!pinnedResponse.ok || !allReposResponse.ok) {
+          throw new Error('Failed to fetch pinned repositories');
         }
-        const data: Repo[] = await response.json();
-        const sortedRepos = data.sort(
-          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-        // Limit to 6 repos for cleaner display
-        setRepos(sortedRepos.slice(0, 6));
+
+        const pinnedReposData: PinnedRepoResponse[] = await pinnedResponse.json();
+        const allReposData: any[] = await allReposResponse.json();
+        console.log(allReposData)
+        const pinnedRepos: Repo[] = pinnedReposData.map((repo, index) => ({
+          id: index,
+          name: repo.name,
+          description: repo.description,
+          html_url: allReposData.find(r => r.name === repo.name).html_url,
+        }));
+
+        setRepos(pinnedRepos);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -45,7 +57,7 @@ export function Projects() {
         </h2>
 
         <p className="text-center text-gray-300 mb-12 text-xl">
-          Some of the things I've built
+          My pinned projects on GitHub.
         </p>
 
         {loading && (

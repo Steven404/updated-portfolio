@@ -1,32 +1,96 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Download, Menu, X } from 'lucide-react';
+
+const NAV_LINKS = [
+  { label: 'About', href: '#about', id: 'about' },
+  { label: 'Projects', href: '#projects', id: 'projects' },
+  { label: 'Contact', href: '#contact', id: 'contact' },
+];
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>('');
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
+  useEffect(() => {
+    const HEADER_HEIGHT = 64; // h-16 = 4rem = 64px
+
+    const updateActive = () => {
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+
+      // Collect each section's top offset relative to the document
+      const sections = NAV_LINKS.map(({ id }) => {
+        const el = document.getElementById(id);
+        return { id, top: el ? el.getBoundingClientRect().top + scrollY : Infinity };
+      });
+
+      // If we're at (or very near) the bottom of the page, activate the last section
+      const nearBottom = scrollY + windowHeight >= docHeight - 4;
+      if (nearBottom) {
+        setActiveSection(sections[sections.length - 1].id);
+        return;
+      }
+
+      // The "active" section is the last one whose top is at or above the
+      // current scroll position + header height (i.e. it has entered the viewport).
+      const passed = sections.filter(({ top }) => top <= scrollY + HEADER_HEIGHT + 10);
+
+      if (passed.length === 0) {
+        // We're above all tracked sections (Hero area) — no active link
+        setActiveSection('');
+      } else {
+        // The last passed section is the one currently in view
+        setActiveSection(passed[passed.length - 1].id);
+      }
+    };
+
+    updateActive(); // run once on mount
+    window.addEventListener('scroll', updateActive, { passive: true });
+    return () => window.removeEventListener('scroll', updateActive);
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-800 bg-gray-900/80 backdrop-blur-md">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <a href="#" className="text-xl font-bold text-white tracking-tight">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between relative">
+        {/* Logo */}
+        <a href="#" className="text-xl font-bold text-white tracking-tight z-10">
           SM
         </a>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex gap-8 items-center">
-          <a href="#about" className="text-sm font-medium hover:text-white text-gray-300 transition-colors">About</a>
-          <a href="#projects" className="text-sm font-medium hover:text-white text-gray-300 transition-colors">Projects</a>
-          <a href="#contact" className="text-sm font-medium hover:text-white text-gray-300 transition-colors">Contact</a>
-          <a
-            href="/cv.pdf"
-            download="cv.pdf"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
-          >
-            <Download size={16} />
-            Resume
-          </a>
+        {/* Desktop Nav — absolutely centered */}
+        <nav className="hidden md:flex gap-8 items-center absolute left-1/2 -translate-x-1/2">
+          {NAV_LINKS.map(({ label, href, id }) => {
+            const isActive = activeSection === id;
+            return (
+              <a
+                key={id}
+                href={href}
+                className={[
+                    'transition-all duration-200',
+                    isActive
+                      ? 'text-white font-semibold scale-110'
+                      : 'text-gray-300 font-medium hover:text-white',
+                    'text-sm inline-block',
+                  ].join(' ')}
+              >
+                {label}
+              </a>
+            );
+          })}
         </nav>
+
+        {/* Resume button — stays on the right */}
+        <a
+          href="/cv.pdf"
+          download="cv.pdf"
+          className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors z-10"
+        >
+          <Download size={16} />
+          Resume
+        </a>
 
         {/* Mobile Menu Toggle */}
         <button
@@ -42,9 +106,24 @@ export function Header() {
       {isMenuOpen && (
         <div className="md:hidden border-t border-gray-800 bg-gray-900/95 backdrop-blur-md absolute w-full shadow-xl">
           <nav className="flex flex-col px-4 py-6 gap-6">
-            <a href="#about" onClick={toggleMenu} className="text-base font-medium text-gray-300 hover:text-white transition-colors">About</a>
-            <a href="#projects" onClick={toggleMenu} className="text-base font-medium text-gray-300 hover:text-white transition-colors">Projects</a>
-            <a href="#contact" onClick={toggleMenu} className="text-base font-medium text-gray-300 hover:text-white transition-colors">Contact</a>
+            {NAV_LINKS.map(({ label, href, id }) => {
+              const isActive = activeSection === id;
+              return (
+                <a
+                  key={id}
+                  href={href}
+                  onClick={toggleMenu}
+                  className={[
+                    'text-base transition-colors',
+                    isActive
+                      ? 'text-white font-semibold'
+                      : 'text-gray-300 font-medium hover:text-white',
+                  ].join(' ')}
+                >
+                  {label}
+                </a>
+              );
+            })}
             <a
               href="/cv.pdf"
               download="cv.pdf"

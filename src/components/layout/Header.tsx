@@ -10,6 +10,7 @@ const NAV_LINKS = [
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
+  const [isWobbling, setIsWobbling] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -56,7 +57,11 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-gray-800 bg-gray-900/80 backdrop-blur-md">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between relative">
         {/* Logo */}
-        <a href="#" className="text-xl font-bold text-white tracking-tight z-10">
+        <a
+          href="#"
+          onClick={() => { setIsWobbling(true); setTimeout(() => setIsWobbling(false), 500); }}
+          className={`text-xl font-bold text-white tracking-tight z-10 inline-block select-none cursor-pointer ${isWobbling ? 'animate-wobble' : ''}`}
+        >
           SM
         </a>
 

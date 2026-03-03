@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ExternalLink, AlertCircle, Loader2 } from 'lucide-react';
 
 interface Repo {
@@ -18,6 +18,7 @@ export function Projects() {
   const [repos, setRepos] = useState<Repo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchRepos = async () => {
@@ -49,6 +50,28 @@ export function Projects() {
     fetchRepos();
   }, []);
 
+  useEffect(() => {
+    if (!cardsRef.current) return;
+    const cards = Array.from(cardsRef.current.children) as HTMLElement[];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            const idx = cards.indexOf(el);
+            el.style.animationDelay = `${idx * 100}ms`;
+            el.classList.remove('opacity-0');
+            el.classList.add('animate-fade-in-up');
+            observer.unobserve(el);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    cards.forEach((card) => observer.observe(card));
+    return () => observer.disconnect();
+  }, [repos]);
+
   return (
     <section id="projects" className="py-24 bg-gray-900">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -75,9 +98,9 @@ export function Projects() {
 
         {!loading && !error && (
           <>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div ref={cardsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
               {repos.map((repo) => (
-                <div key={repo.id} className="bg-gray-800/40 rounded-xl border border-gray-800 p-8 flex flex-col h-full hover:border-blue-500/50 hover:bg-gray-800/80 transition-all duration-300">
+                <div key={repo.id} className="opacity-0 bg-gray-800/40 rounded-xl border border-gray-800 p-8 flex flex-col h-full hover:border-blue-500/50 hover:bg-gray-800/80 transition-all duration-300">
                   <h3 className="text-xl font-bold text-white mb-4 capitalize">
                     {repo.name.replace(/-/g, ' ')}
                   </h3>

@@ -59,10 +59,10 @@ export function About() {
             className="opacity-0 space-y-6"
           >
             <p className="text-gray-300 text-xl leading-relaxed">
-              With almost 5 years of experience as a front end and full stack software engineer...
+              With almost 5 years of experience as a front end and full stack software engineer, I specialize in developing fully functional web and mobile applications from start to finish. I strive to create modular and <strong>maintainable</strong> projects that implement cutting edge technologies and practices
             </p>
             <p className="text-gray-300 text-md leading-relaxed">
-              Shortly before graduating, I started my journey as a developer...
+              Shortly before graduating, I started my journey as a developer and have been learning and creating ever since.
             </p>
             <p className="text-gray-300 text-xl leading-relaxed">
               Lately I've been focusing on building React Native apps with&nbsp;

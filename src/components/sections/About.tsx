@@ -65,7 +65,7 @@ export function About() {
               Shortly before graduating, I started my journey as a developer...
             </p>
             <p className="text-gray-300 text-xl leading-relaxed">
-              Lately I've been focusing on building React Native apps with
+              Lately I've been focusing on building React Native apps with&nbsp;
               <strong>offline-first UX</strong>, <strong>fast performance</strong>
               and <strong className='italic'>scalable coding practices</strong>.
             </p>

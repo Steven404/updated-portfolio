@@ -87,10 +87,9 @@ export function Header() {
           })}
         </nav>
 
-        {/* Resume button — stays on the right */}
         <a
-          href="/cv.pdf"
-          download="cv.pdf"
+          href="/stefanos-michelakis-cv-english.pdf"
+          download="stefanos-michelakis-cv-english.pdf"
           className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors z-10"
         >
           <Download size={16} />
@@ -130,8 +129,8 @@ export function Header() {
               );
             })}
             <a
-              href="/cv.pdf"
-              download="cv.pdf"
+              href="/stefanos-michelakis-cv-english.pdf"
+              download="stefanos-michelakis-cv-english.pdf"
               onClick={toggleMenu}
               className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors mt-2"
             >

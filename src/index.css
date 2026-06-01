@@ -1,27 +1,59 @@
 @import "tailwindcss";
 
+@theme {
+  --color-deep: #003135;
+  --color-mid: #024950;
+  --color-rust: #964734;
+  --color-teal: #0FA4AF;
+  --color-sky: #AFDDE5;
+
+  --font-display: "Bricolage Grotesque", sans-serif;
+  --font-body: "Figtree", sans-serif;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-gray-900 text-gray-100 antialiased min-h-screen m-0;
+    background-color: #003135;
+    color: #AFDDE5;
+    font-family: "Figtree", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    margin: 0;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply text-white font-bold tracking-tight;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: #AFDDE5;
+    text-wrap: balance;
   }
 
   a {
-    @apply text-blue-400 hover:text-blue-300 transition-colors;
+    color: #0FA4AF;
+    transition: color 0.2s;
+  }
+
+  a:hover {
+    color: #AFDDE5;
   }
 }
 
-@keyframes fadeInUp {
+/* ── Entrance animations ───────────────────────────────────────── */
+@keyframes revealUp {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(22px);
   }
   to {
     opacity: 1;
@@ -29,19 +61,71 @@
   }
 }
 
-@keyframes wobble {
-  0%, 100% { transform: rotate(0deg); }
-  20% { transform: rotate(-8deg); }
-  40% { transform: rotate(8deg); }
-  60% { transform: rotate(-5deg); }
-  80% { transform: rotate(5deg); }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out both;
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes scrollLine {
+  0%   { transform: scaleY(0); transform-origin: top; opacity: 1; }
+  50%  { transform: scaleY(1); transform-origin: top; opacity: 1; }
+  100% { transform: scaleY(1); transform-origin: bottom; opacity: 0; }
+}
+
+@keyframes wobble {
+  0%, 100% { transform: rotate(0deg); }
+  20%       { transform: rotate(-8deg); }
+  40%       { transform: rotate(8deg); }
+  60%       { transform: rotate(-5deg); }
+  80%       { transform: rotate(5deg); }
+}
+
+.animate-reveal-up {
+  animation: revealUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease both;
+}
+
+.animate-spin-slow {
+  animation: spinSlow 28s linear infinite;
+  transform-origin: 190px 190px;
+}
+
+.animate-scroll-line {
+  animation: scrollLine 1.8s ease-in-out infinite;
 }
 
 .animate-wobble {
   animation: wobble 0.5s ease-in-out;
 }
 
+/* Legacy class — kept so other sections don't break */
+.animate-fade-in-up {
+  animation: revealUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-reveal-up,
+  .animate-fade-in,
+  .animate-fade-in-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .animate-spin-slow {
+    animation: none;
+  }
+
+  .animate-scroll-line {
+    animation: none;
+    opacity: 0.4;
+  }
+}

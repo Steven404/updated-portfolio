@@ -1,100 +1,149 @@
-import { useEffect, useRef } from 'react';
+import { FileDown } from 'lucide-react';
 import { useScrollFadeIn } from '../../hooks/useScrollFadeIn';
 
-const SKILLS = [
-  'JavaScript (ES6+)', 'TypeScript', 'React', 'React Native',
-  'React Query', 'Context API', 'Node.js', 'Tailwind CSS',
-  'Git / GitHub', 'Figma', 'Angular', 'NgRx',
+const SKILL_GROUPS = [
+  { category: 'Languages',    skills: ['JavaScript (ES6+)', 'TypeScript'] },
+  { category: 'Frontend',     skills: ['React', 'Angular', 'Tailwind CSS'] },
+  { category: 'Mobile',       skills: ['React Native'] },
+  { category: 'State & Data', skills: ['React Query', 'Context API', 'NgRx'] },
+  { category: 'Tooling',      skills: ['Node.js', 'Git / GitHub', 'Figma'] },
 ];
 
 export function About() {
   const headingRef = useScrollFadeIn();
-  const subtitleRef = useScrollFadeIn();
-  const bioRef = useScrollFadeIn(0.1);
-  const skillsRef = useScrollFadeIn(0.1);
-  const bannerRef = useScrollFadeIn(0.1);
-  const skillsListRef = useRef<HTMLUListElement>(null);
-
-  useEffect(() => {
-    const ul = skillsListRef.current;
-    if (!ul) return;
-    const items = Array.from(ul.children) as HTMLElement[];
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const el = entry.target as HTMLElement;
-            const idx = items.indexOf(el);
-            el.style.animationDelay = `${idx * 60}ms`;
-            el.classList.remove('opacity-0');
-            el.classList.add('animate-fade-in-up');
-            observer.unobserve(el);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-    items.forEach((item) => observer.observe(item));
-    return () => observer.disconnect();
-  }, []);
+  const bioRef     = useScrollFadeIn(0.05);
+  const skillsRef  = useScrollFadeIn(0.05);
 
   return (
-    <section id="about" className="pt-24 bg-gray-800/50">
-      <div className="container mx-auto px-4 max-w-5xl">
+    <section
+      id="about"
+      className="relative py-28 lg:py-36 overflow-hidden"
+      style={{ background: 'rgba(2,73,80,0.14)' }}
+    >
+      {/* Subtle dot grid — echoes the Hero */}
+      <div className="absolute inset-0 pointer-events-none select-none" aria-hidden>
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage: 'radial-gradient(circle, #0FA4AF 1px, transparent 1px)',
+            backgroundSize: '36px 36px',
+          }}
+        />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-6 lg:px-16 xl:px-20">
         <h2
           ref={headingRef as React.RefObject<HTMLHeadingElement>}
-          className="opacity-0 text-3xl md:text-4xl font-bold mb-12 text-center text-white"
+          className="opacity-0 mb-16 lg:mb-20"
+          style={{
+            fontFamily: '"Bricolage Grotesque", sans-serif',
+            fontSize: 'clamp(2.25rem, 4.5vw, 3.75rem)',
+            fontWeight: 700,
+            letterSpacing: '-0.04em',
+            color: '#AFDDE5',
+            textWrap: 'balance',
+          }}
         >
-          Who am I?
+          A bit about me<span style={{ color: '#964734' }}>.</span>
         </h2>
-        <p
-          ref={subtitleRef as React.RefObject<HTMLParagraphElement>}
-          className="opacity-0 text-center text-gray-300 mb-12 text-xl md:text-2xl"
-        >
-          I'm a young and passionate <strong>Software Engineer</strong>.
-        </p>
-        <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-start">
+
+        <div className="grid lg:grid-cols-[1fr_340px] gap-16 xl:gap-24 items-start">
+
+          {/* Bio */}
           <div
             ref={bioRef as React.RefObject<HTMLDivElement>}
             className="opacity-0 space-y-6"
           >
-            <p className="text-gray-300 text-xl leading-relaxed">
-              With almost 5 years of experience as a front end and full stack software engineer, I specialize in developing fully functional web and mobile applications from start to finish. I strive to create modular and <strong>maintainable</strong> projects that implement cutting edge technologies and practices
+            <p
+              className="text-xl leading-relaxed"
+              style={{
+                color: 'rgba(175,221,229,0.85)',
+                fontFamily: '"Figtree", sans-serif',
+                maxWidth: '62ch',
+              }}
+            >
+              Five years building web and mobile products that ship to real users. My focus is React and React Native — from architecture through deployment, with a particular interest in good UX practices and the performance details most teams deprioritize.
             </p>
-            <p className="text-gray-300 text-md leading-relaxed">
-              Shortly before graduating, I started my journey as a developer and have been learning and creating ever since.
+            <p
+              className="text-lg leading-relaxed"
+              style={{
+                color: 'rgba(175,221,229,0.65)',
+                fontFamily: '"Figtree", sans-serif',
+                maxWidth: '62ch',
+              }}
+            >
+              I started freelancing shortly before graduating and have been building across client products and personal projects ever since. I care about maintainable code and polished interfaces in equal measure.
             </p>
-            <p className="text-gray-300 text-xl leading-relaxed">
-              Lately I've been focusing on building React Native apps with&nbsp;
-              <strong>offline-first UX</strong>, <strong>fast performance</strong>
-              and <strong className='italic'>scalable coding practices</strong>.
+            <p
+              className="leading-relaxed"
+              style={{
+                color: 'rgba(175,221,229,0.45)',
+                fontFamily: '"Figtree", sans-serif',
+                maxWidth: '62ch',
+              }}
+            >
+              Based in Thessaloniki, Greece. Available for remote work.
             </p>
+            <div className="pt-4">
+              <a
+                href="/resume.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 text-sm font-semibold transition-colors duration-200"
+                style={{ color: '#0FA4AF', fontFamily: '"Figtree", sans-serif' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#AFDDE5'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#0FA4AF'; }}
+              >
+                <span className="h-px w-8 rounded-full bg-current" aria-hidden />
+                Download resume
+                <FileDown size={15} aria-hidden />
+              </a>
+            </div>
           </div>
+
+          {/* Skills — categorized bordered list */}
           <div
             ref={skillsRef as React.RefObject<HTMLDivElement>}
-            className="opacity-0 bg-gray-900 rounded-xl p-8 border border-gray-800 shadow-sm"
+            className="opacity-0"
+            style={{ borderTop: '1px solid rgba(2,73,80,0.7)' }}
           >
-            <h3 className="text-xl font-semibold mb-6 text-white border-b border-gray-800 pb-4">
-              Technologies I've been working with:
-            </h3>
-            <ul ref={skillsListRef} className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6">
-              {SKILLS.map((skill, index) => (
-                <li key={index} className="opacity-0 flex items-center text-gray-300">
-                  <span className="text-blue-500 mr-3 text-sm">▹</span>
-                  <span className="font-medium">{skill}</span>
-                </li>
-              ))}
-            </ul>
+            {SKILL_GROUPS.map(({ category, skills }) => (
+              <div
+                key={category}
+                className="py-5"
+                style={{ borderBottom: '1px solid rgba(2,73,80,0.7)' }}
+              >
+                <p
+                  className="text-xs font-medium mb-3"
+                  style={{
+                    color: 'rgba(175,221,229,0.35)',
+                    fontFamily: '"Figtree", sans-serif',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {category}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {skills.map((skill) => (
+                    <span
+                      key={skill}
+                      className="text-sm px-3 py-1.5 rounded-lg"
+                      style={{
+                        background: 'rgba(2,73,80,0.5)',
+                        color: 'rgba(175,221,229,0.82)',
+                        fontFamily: '"Figtree", sans-serif',
+                      }}
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
+
         </div>
-      </div>
-      <div
-        ref={bannerRef as React.RefObject<HTMLDivElement>}
-        className="opacity-0 mt-24 bg-gray-800 flex items-center justify-center py-12 w-full max-md:px-4"
-      >
-        <p className="text-gray-100 text-center text-2xl">
-          Always on the look for new projects and opportunities to grow from
-        </p>
       </div>
     </section>
   );

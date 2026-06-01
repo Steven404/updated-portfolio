@@ -62,7 +62,7 @@ export function About() {
                 maxWidth: '62ch',
               }}
             >
-              Five years building web and mobile products that ship to real users. My focus is React and React Native — from architecture through deployment, with a particular interest in good UX practices and the performance details most teams deprioritize.
+              Five years building web and mobile products that ship to real users. My focus is React and React Native — from architecture through deployment, with a particular interest in good UX practices and the performance details that some times get deprioritized in our field.
             </p>
             <p
               className="text-lg leading-relaxed"
@@ -72,7 +72,7 @@ export function About() {
                 maxWidth: '62ch',
               }}
             >
-              I started freelancing shortly before graduating and have been building across client products and personal projects ever since. I care about maintainable code and polished interfaces in equal measure.
+              I started my software development career shortly before graduating and have been building across client products and personal projects ever since. I care about maintainable code and polished interfaces in equal measure.
             </p>
             <p
               className="leading-relaxed"

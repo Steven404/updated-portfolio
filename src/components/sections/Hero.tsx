@@ -82,7 +82,7 @@ export function Hero() {
               textWrap: 'pretty',
             }}
           >
-            I build React apps and React Native mobile products that ship to real users — with five years of production experience and a relentless eye for the small details that most engineers skip.
+            I build React apps and React Native mobile products that ship to real users — with five years of production experience and a relentless eye for the small details that make the difference.
           </p>
 
           {/* CTAs */}

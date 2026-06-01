@@ -8,12 +8,21 @@ const NAV_LINKS = [
 ];
 
 export function Header() {
-  const [isMenuOpen, setIsMenuOpen]   = useState(false);
+  const [isMenuOpen, setIsMenuOpen]       = useState(false);
+  const [isMenuClosing, setIsMenuClosing] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
-  const [isWobbling, setIsWobbling]   = useState(false);
-  const [scrolled, setScrolled]       = useState(false);
+  const [isWobbling, setIsWobbling]       = useState(false);
+  const [scrolled, setScrolled]           = useState(false);
 
-  const toggleMenu = () => setIsMenuOpen(o => !o);
+  const openMenu  = () => setIsMenuOpen(true);
+  const closeMenu = () => {
+    setIsMenuClosing(true);
+    setTimeout(() => {
+      setIsMenuOpen(false);
+      setIsMenuClosing(false);
+    }, 200);
+  };
+  const toggleMenu = () => (isMenuOpen ? closeMenu() : openMenu());
 
   useEffect(() => {
     const HEADER_HEIGHT = 64;
@@ -47,7 +56,7 @@ export function Header() {
 
   return (
     <header
-      className="sticky top-0 z-50 w-full transition-all duration-300"
+      className="sticky top-0 z-50 w-full transition-all duration-300 animate-nav-enter"
       style={{
         background: scrolled
           ? 'rgba(0,49,53,0.88)'
@@ -82,11 +91,10 @@ export function Header() {
               <a
                 key={id}
                 href={href}
-                className="text-sm font-medium transition-all duration-200 inline-block"
+                className="nav-link text-sm font-medium inline-block"
                 style={{
                   color: isActive ? '#0FA4AF' : 'rgba(175,221,229,0.65)',
                   fontFamily: '"Figtree", sans-serif',
-                  transform: isActive ? 'none' : 'none',
                 }}
                 onMouseEnter={e => {
                   if (!isActive) (e.currentTarget as HTMLElement).style.color = '#AFDDE5';
@@ -96,13 +104,16 @@ export function Header() {
                 }}
               >
                 {label}
-                {isActive && (
-                  <span
-                    className="block h-0.5 mt-0.5 rounded-full"
-                    style={{ background: '#964734' }}
-                    aria-hidden
-                  />
-                )}
+                <span
+                  className="block h-0.5 mt-0.5 rounded-full"
+                  style={{
+                    background: '#964734',
+                    transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
+                    transformOrigin: 'left',
+                    transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                  }}
+                  aria-hidden
+                />
               </a>
             );
           })}
@@ -112,7 +123,7 @@ export function Header() {
         <a
           href="/stefanos-michelakis-cv-english.pdf"
           download="stefanos-michelakis-cv-english.pdf"
-          className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold z-10 transition-all duration-200"
+          className="resume-btn hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold z-10"
           style={{
             background: '#964734',
             color: '#AFDDE5',
@@ -137,14 +148,16 @@ export function Header() {
           aria-expanded={isMenuOpen}
           style={{ color: 'rgba(175,221,229,0.7)' }}
         >
-          {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          <span key={isMenuOpen ? 'open' : 'closed'} className="animate-icon-swap">
+            {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          </span>
         </button>
       </div>
 
       {/* Mobile nav */}
-      {isMenuOpen && (
+      {(isMenuOpen || isMenuClosing) && (
         <div
-          className="md:hidden absolute w-full shadow-xl"
+          className={`md:hidden absolute w-full shadow-xl ${isMenuClosing ? 'animate-menu-out' : 'animate-menu-in'}`}
           style={{
             background: 'rgba(0,49,53,0.97)',
             backdropFilter: 'blur(14px)',
@@ -152,17 +165,18 @@ export function Header() {
           }}
         >
           <nav className="flex flex-col px-6 py-6 gap-5" aria-label="Mobile navigation">
-            {NAV_LINKS.map(({ label, href, id }) => {
+            {NAV_LINKS.map(({ label, href, id }, i) => {
               const isActive = activeSection === id;
               return (
                 <a
                   key={id}
                   href={href}
-                  onClick={toggleMenu}
-                  className="text-base font-medium transition-colors"
+                  onClick={closeMenu}
+                  className={`text-base font-medium transition-colors${isMenuClosing ? '' : ' animate-menu-item'}`}
                   style={{
                     color: isActive ? '#0FA4AF' : 'rgba(175,221,229,0.75)',
                     fontFamily: '"Figtree", sans-serif',
+                    animationDelay: isMenuClosing ? undefined : `${i * 40 + 60}ms`,
                   }}
                 >
                   {label}
@@ -172,7 +186,7 @@ export function Header() {
             <a
               href="/stefanos-michelakis-cv-english.pdf"
               download="stefanos-michelakis-cv-english.pdf"
-              onClick={toggleMenu}
+              onClick={closeMenu}
               className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all mt-1"
               style={{
                 background: '#964734',

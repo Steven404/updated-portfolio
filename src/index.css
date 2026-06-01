@@ -85,6 +85,107 @@
   80%       { transform: rotate(5deg); }
 }
 
+/* ── Navbar animations ─────────────────────────────────────────── */
+@keyframes navEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes menuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes menuSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes iconSwap {
+  from {
+    opacity: 0;
+    transform: rotate(-80deg) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes menuItemIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-nav-enter {
+  animation: navEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-menu-in {
+  animation: menuSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-menu-out {
+  animation: menuSlideOut 0.2s cubic-bezier(0.5, 0, 0.88, 0) both;
+}
+
+.animate-icon-swap {
+  animation: iconSwap 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  display: inline-flex;
+}
+
+.animate-menu-item {
+  animation: menuItemIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Nav link + button interactions ────────────────────────────── */
+.nav-link {
+  transition: color 0.2s, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-link:hover {
+  transform: translateY(-1px);
+}
+
+.resume-btn {
+  transition: background 0.2s, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.resume-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(150, 71, 52, 0.35);
+}
+
+.resume-btn:active {
+  transform: translateY(0px) scale(0.97);
+  box-shadow: none;
+}
+
+/* ── Animation classes ─────────────────────────────────────────── */
 .animate-reveal-up {
   animation: revealUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -114,7 +215,12 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-reveal-up,
   .animate-fade-in,
-  .animate-fade-in-up {
+  .animate-fade-in-up,
+  .animate-nav-enter,
+  .animate-menu-in,
+  .animate-menu-out,
+  .animate-menu-item,
+  .animate-icon-swap {
     animation: none;
     opacity: 1;
     transform: none;
@@ -127,5 +233,16 @@
   .animate-scroll-line {
     animation: none;
     opacity: 0.4;
+  }
+
+  .nav-link,
+  .resume-btn {
+    transition: color 0.2s, background 0.2s;
+  }
+
+  .nav-link:hover,
+  .resume-btn:hover {
+    transform: none;
+    box-shadow: none;
   }
 }

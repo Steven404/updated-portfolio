@@ -2,7 +2,7 @@ import { FileDown } from 'lucide-react';
 import { useScrollFadeIn } from '../../hooks/useScrollFadeIn';
 
 const SKILL_GROUPS = [
-  { category: 'Languages',    skills: ['JavaScript (ES6+)', 'TypeScript'] },
+  { category: 'Languages',    skills: ['JavaScript (ES6+)', 'TypeScript', 'Python'] },
   { category: 'Frontend',     skills: ['React', 'Angular', 'Tailwind CSS'] },
   { category: 'Mobile',       skills: ['React Native'] },
   { category: 'State & Data', skills: ['React Query', 'Context API', 'NgRx'] },
@@ -62,7 +62,7 @@ export function About() {
                 maxWidth: '62ch',
               }}
             >
-              Five years building web and mobile products that ship to real users. My focus is React and React Native — from architecture through deployment, with a particular interest in good UX practices and the performance details that some times get deprioritized in our field.
+              5+ years building web and mobile products that ship to real users. My focus is React and React Native — from architecture through deployment, with a particular interest in good UX practices and the performance details that some times get deprioritized in our field.
             </p>
             <p
               className="text-lg leading-relaxed"

@@ -11,8 +11,8 @@ function App() {
 
       <main className="grow">
         <Hero />
-        <About />
         <Projects />
+        <About />
         <Contact />
       </main>
 

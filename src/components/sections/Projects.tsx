@@ -1,208 +1,173 @@
-import { useState, useEffect, useRef } from 'react';
-import { AlertCircle, ArrowUpRight, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 import { useScrollFadeIn } from '../../hooks/useScrollFadeIn';
+import { useTheme } from '../../hooks/useTheme';
+import { ScreenshotCarousel, type Screenshot } from '../ui/ScreenshotCarousel';
 
-interface Repo {
-  id: number;
-  name: string;
-  description: string | null;
-  html_url: string;
+interface ProjectLink {
+  label: string;
+  href: string;
 }
 
-interface PinnedRepoResponse {
-  repo: string;
-  name: string;
-  description: string | null;
+interface ProjectInfo {
+  kicker: string;
+  title: string;
+  description?: string;
+  tags: string[];
+  links: ProjectLink[];
+}
+
+const NOTES_SHOT_ALTS = [
+  'Rich-text editor with a grocery list and a formatting toolbar above the keyboard',
+  'A saved recipe note with headings and bullet lists',
+  'Tasks screen with a checklist, two of four tasks done',
+  'Empty notes screen with an illustration and a button to add a note',
+];
+
+const NOTES_SHOTS: Record<'light' | 'dark', Screenshot[]> = {
+  dark:  NOTES_SHOT_ALTS.map((alt, i) => ({ src: `/images/notes-dark-${i + 1}.webp`, alt })),
+  light: NOTES_SHOT_ALTS.map((alt, i) => ({ src: `/images/notes-light-${i + 1}.webp`, alt })),
+};
+
+const NOTES_APP: ProjectInfo = {
+  kicker: '01 — MOBILE',
+  title: 'Offline Notes App',
+  description: 'A notes and tasks app for React Native that works fully offline.',
+  tags: ['React Native', 'TypeScript'],
+  links: [{ label: 'Source', href: 'https://github.com/Steven404/offline-notes-app' }],
+};
+
+const PLATFORMER: ProjectInfo = {
+  kicker: '02 — GAME',
+  title: '2D Platformer',
+  description: 'A complete 2D platformer built in Unity with C#. Every sprite hand-drawn in Photoshop.',
+  tags: ['Unity', 'C#', 'Pixel art'],
+  links: [{ label: 'Source', href: 'https://github.com/Steven404/2D-Platformer' }],
+};
+
+const LANGUAGE_TEACHER: ProjectInfo = {
+  kicker: '03 — WEB',
+  title: 'Language Teacher Portfolio',
+  tags: ['React'],
+  links: [{ label: 'Source', href: 'https://github.com/Steven404/thalia-portfolio' }],
+};
+
+function ProjectDetails({ project, large = false }: { project: ProjectInfo; large?: boolean }) {
+  return (
+    <div>
+      <div className="font-mono text-[13px] text-accent tracking-[0.06em]">{project.kicker}</div>
+      <h3
+        className={`font-display font-bold tracking-[-0.02em] ${
+          large ? 'mt-3.5 text-4xl leading-[1.1]' : 'mt-3 text-[28px] leading-[1.15]'
+        }`}
+      >
+        {project.title}
+      </h3>
+      {project.description && (
+        <p className={`${large ? 'mt-4' : 'mt-3'} text-fg-2`}>{project.description}</p>
+      )}
+      <ul className={`${large ? 'mt-6' : 'mt-5'} flex flex-wrap gap-2 font-mono text-[13px]`}>
+        {project.tags.map(tag => (
+          <li key={tag} className="border border-line-strong rounded-full px-3 py-[5px]">
+            {tag}
+          </li>
+        ))}
+      </ul>
+      <div className={`${large ? 'mt-7' : 'mt-6'} flex flex-wrap gap-6 font-medium`}>
+        {project.links.map(({ label, href }) => (
+          <a key={href} href={href} target="_blank" rel="noopener noreferrer">
+            {label} ↗
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PlatformerVideo() {
+  const [reduceMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  return (
+    <video
+      src="/images/platformer.mp4"
+      poster="/images/platformer-poster.webp"
+      aria-label="Gameplay from the 2D platformer: a pixel-art character running and jumping across snow, rain and forest levels while collecting coins"
+      autoPlay={!reduceMotion}
+      controls={reduceMotion}
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      width={640}
+      height={360}
+      className="block w-full h-auto aspect-video object-cover rounded-xl border border-line [image-rendering:pixelated]"
+    />
+  );
 }
 
 export function Projects() {
-  const [repos, setRepos]     = useState<Repo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
-
-  const headingRef = useScrollFadeIn();
-  const listRef    = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const fetchRepos = async () => {
-      try {
-        const pinnedResponse   = await fetch('https://pinned.berrysauce.dev/get/Steven404');
-        const allReposResponse = await fetch('https://api.github.com/users/Steven404/repos');
-        if (!pinnedResponse.ok || !allReposResponse.ok) {
-          throw new Error('Failed to fetch repositories');
-        }
-        const pinnedReposData: PinnedRepoResponse[] = await pinnedResponse.json();
-        const allReposData: { name: string; html_url: string }[] = await allReposResponse.json();
-
-        const pinnedRepos: Repo[] = pinnedReposData.map((repo, index) => ({
-          id: index,
-          name: repo.name,
-          description: repo.description,
-          html_url: allReposData.find(r => r.name === repo.name)?.html_url ?? `https://github.com/Steven404/${repo.name}`,
-        }));
-
-        setRepos(pinnedRepos);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchRepos();
-  }, []);
-
-  /* Staggered reveal for list rows */
-  useEffect(() => {
-    const container = listRef.current;
-    if (!container) return;
-    const rows = Array.from(container.querySelectorAll<HTMLElement>('[data-project-row]'));
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const el  = entry.target as HTMLElement;
-            const idx = rows.indexOf(el);
-            el.style.animationDelay = `${idx * 75}ms`;
-            el.classList.remove('opacity-0');
-            el.classList.add('animate-fade-in-up');
-            observer.unobserve(el);
-          }
-        });
-      },
-      { threshold: 0.05 }
-    );
-    rows.forEach(row => observer.observe(row));
-    return () => observer.disconnect();
-  }, [repos]);
+  const { theme } = useTheme();
+  const headingRef = useScrollFadeIn<HTMLDivElement>();
+  const featuredRef = useScrollFadeIn<HTMLElement>(0.05);
+  const gridRef = useScrollFadeIn<HTMLDivElement>(0.05);
 
   return (
-    <section id="projects" className="relative py-28 lg:py-36 overflow-hidden bg-deep">
-      {/* Very subtle dot grid */}
-      <div className="absolute inset-0 pointer-events-none select-none" aria-hidden>
-        <div
-          className="absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage: 'radial-gradient(circle, #0FA4AF 1px, transparent 1px)',
-            backgroundSize: '36px 36px',
-          }}
-        />
-      </div>
-
-      <div className="relative z-10 container mx-auto px-6 lg:px-16 xl:px-20">
-
-        {/* Header row */}
-        <div className="flex items-end justify-between mb-16 lg:mb-20 gap-6">
-          <h2
-            ref={headingRef as React.RefObject<HTMLHeadingElement>}
-            className="opacity-0"
-            style={{
-              fontFamily: '"Bricolage Grotesque", sans-serif',
-              fontSize: 'clamp(2.25rem, 4.5vw, 3.75rem)',
-              fontWeight: 700,
-              letterSpacing: '-0.04em',
-              color: '#AFDDE5',
-              textWrap: 'balance',
-            }}
-          >
-            Selected work<span style={{ color: '#964734' }}>.</span>
+    <section id="work" className="border-t border-line">
+      <div className="max-w-[1200px] mx-auto px-6 py-24">
+        <div ref={headingRef} className="opacity-0 flex flex-wrap justify-between items-baseline gap-4">
+          <h2 className="font-display font-bold text-[clamp(36px,5vw,56px)] tracking-[-0.03em] leading-none">
+            Selected work
           </h2>
           <a
             href="https://github.com/Steven404"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium transition-colors duration-200 shrink-0 mb-1.5"
-            style={{ color: 'rgba(175,221,229,0.45)', fontFamily: '"Figtree", sans-serif' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#AFDDE5'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(175,221,229,0.45)'; }}
+            className="text-[15px] text-muted hover:text-accent"
           >
-            All projects on GitHub
-            <ArrowUpRight size={14} aria-hidden />
+            All projects on GitHub ↗
           </a>
         </div>
 
-        {/* States */}
-        {loading && (
-          <div className="flex justify-center items-center py-28" style={{ color: '#0FA4AF' }}>
-            <Loader2 size={38} className="animate-spin" />
-          </div>
-        )}
+        {/* Project 01 */}
+        <article
+          ref={featuredRef}
+          className="opacity-0 mt-16 p-5 sm:p-10 bg-surface border border-line rounded-[20px] grid grid-cols-[repeat(auto-fit,minmax(min(100%,360px),1fr))] gap-12 items-center"
+        >
+          <ScreenshotCarousel shots={NOTES_SHOTS[theme]} label="Offline Notes App screenshots" />
+          <ProjectDetails project={NOTES_APP} large />
+        </article>
 
-        {error && (
-          <div className="flex flex-col items-center justify-center py-28 gap-4" style={{ color: '#964734' }}>
-            <AlertCircle size={38} />
-            <p className="text-base" style={{ fontFamily: '"Figtree", sans-serif' }}>{error}</p>
-          </div>
-        )}
+        {/* Project 02 + 03 */}
+        <div
+          ref={gridRef}
+          className="opacity-0 mt-6 grid grid-cols-[repeat(auto-fit,minmax(min(100%,420px),1fr))] gap-6"
+        >
+          <article className="p-6 sm:p-8 bg-surface border border-line rounded-[20px] flex flex-col gap-6">
+            <PlatformerVideo />
+            <ProjectDetails project={PLATFORMER} />
+          </article>
 
-        {/* Editorial list */}
-        {!loading && !error && (
-          <>
-            <div
-              ref={listRef}
-              style={{ borderTop: '1px solid rgba(2,73,80,0.55)' }}
-            >
-              {repos.map((repo) => (
-                <a
-                  key={repo.id}
-                  data-project-row
-                  href={repo.html_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group opacity-0 flex items-start justify-between gap-8 py-8 transition-colors duration-300"
-                  style={{ borderBottom: '1px solid rgba(2,73,80,0.55)' }}
-                  aria-label={`View ${repo.name.replace(/-/g, ' ')} on GitHub`}
-                >
-                  <div className="flex-1 min-w-0">
-                    <h3
-                      className="text-2xl font-bold capitalize mb-3 transition-colors duration-200 group-hover:text-teal"
-                      style={{
-                        fontFamily: '"Bricolage Grotesque", sans-serif',
-                        letterSpacing: '-0.03em',
-                        color: '#AFDDE5',
-                      }}
-                    >
-                      {repo.name.replace(/-/g, ' ')}
-                    </h3>
-                    <p
-                      className="leading-relaxed"
-                      style={{
-                        color: 'rgba(175,221,229,0.5)',
-                        fontFamily: '"Figtree", sans-serif',
-                        maxWidth: '60ch',
-                      }}
-                    >
-                      {repo.description ?? 'No description provided for this repository.'}
-                    </p>
-                  </div>
-
-                  {/* Arrow affordance */}
-                  <div
-                    className="shrink-0 mt-1 p-2.5 rounded-xl transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0"
-                    style={{ background: 'rgba(15,164,175,0.12)', color: '#0FA4AF' }}
-                    aria-hidden
-                  >
-                    <ArrowUpRight size={18} />
-                  </div>
-                </a>
-              ))}
+          <article className="p-6 sm:p-8 bg-surface border border-line rounded-[20px] flex flex-col gap-6">
+            <div className="aspect-video rounded-xl bg-surface-2 border border-line flex flex-col overflow-hidden">
+              <div className="h-7 shrink-0 border-b border-line flex items-center gap-1.5 px-3" aria-hidden>
+                <span className="w-2 h-2 rounded-full bg-line-strong" />
+                <span className="w-2 h-2 rounded-full bg-line-strong" />
+                <span className="w-2 h-2 rounded-full bg-line-strong" />
+              </div>
+              <div className="grow min-h-0 bg-[#FEF5EA]">
+                <img
+                  src="/images/language-teacher.webp"
+                  alt="Homepage of the language teacher site: headline “Your English Learning Journey Starts Here.” beside the English Lessons logo"
+                  width={1100}
+                  height={573}
+                  loading="lazy"
+                  decoding="async"
+                  className="block w-full h-full object-cover object-top"
+                />
+              </div>
             </div>
-
-            {/* Mobile GitHub link */}
-            <div className="sm:hidden text-center mt-12">
-              <a
-                href="https://github.com/Steven404"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm font-medium"
-                style={{ color: 'rgba(175,221,229,0.45)', fontFamily: '"Figtree", sans-serif' }}
-              >
-                All projects on GitHub
-                <ArrowUpRight size={14} aria-hidden />
-              </a>
-            </div>
-          </>
-        )}
-
+            <ProjectDetails project={LANGUAGE_TEACHER} />
+          </article>
+        </div>
       </div>
     </section>
   );

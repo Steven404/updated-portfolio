@@ -1,0 +1,118 @@
+import { useRef, useState, type KeyboardEvent, type ReactNode, type TouchEvent } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+export interface Screenshot {
+  src: string;
+  alt: string;
+}
+
+const SWIPE_THRESHOLD = 40;
+
+function ArrowButton({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="shrink-0 w-11 h-11 inline-flex items-center justify-center rounded-full border border-line-strong hover:border-dim bg-surface text-fg cursor-pointer"
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Phone-framed screenshot carousel: arrows, dots, swipe and Left/Right keys. */
+export function ScreenshotCarousel({ shots, label }: { shots: Screenshot[]; label: string }) {
+  const [current, setCurrent] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+
+  const count = shots.length;
+  const go = (index: number) => setCurrent((index + count) % count);
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      go(current - 1);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      go(current + 1);
+    }
+  };
+
+  const onTouchStart = (e: TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const onTouchEnd = (e: TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(dx) >= SWIPE_THRESHOLD) go(dx < 0 ? current + 1 : current - 1);
+  };
+
+  return (
+    <div
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={label}
+      tabIndex={0}
+      onKeyDown={onKeyDown}
+      className="flex flex-col items-center gap-5 bg-ground rounded-[14px] px-2 sm:px-4 pt-10 pb-7 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+    >
+      <div className="flex w-full items-center justify-center gap-3 sm:gap-5">
+        <ArrowButton label="Previous screenshot" onClick={() => go(current - 1)}>
+          <ChevronLeft size={20} strokeWidth={1.8} aria-hidden />
+        </ArrowButton>
+
+        <div
+          className="w-full min-w-0 max-w-[240px] aspect-[12/25] rounded-[40px] border border-line-strong bg-surface p-3 touch-pan-y"
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
+          <div className="relative h-full rounded-[30px] overflow-hidden bg-screen">
+            {shots.map((shot, i) => (
+              <img
+                key={shot.src}
+                src={shot.src}
+                alt={shot.alt}
+                aria-hidden={i !== current}
+                width={432}
+                height={911}
+                loading={i === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+                draggable={false}
+                className={`absolute inset-0 w-full h-full object-cover object-top select-none transition-opacity duration-250 ease-out motion-reduce:transition-none ${
+                  i === current ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        <ArrowButton label="Next screenshot" onClick={() => go(current + 1)}>
+          <ChevronRight size={20} strokeWidth={1.8} aria-hidden />
+        </ArrowButton>
+      </div>
+
+      <div className="flex items-center gap-0.5">
+        {shots.map((shot, i) => (
+          <button
+            key={shot.src}
+            type="button"
+            onClick={() => go(i)}
+            aria-label={`Show screenshot ${i + 1} of ${count}`}
+            aria-current={i === current}
+            className="w-7 h-7 inline-flex items-center justify-center cursor-pointer"
+          >
+            <span
+              className={`block h-2 rounded-full transition-[width,background-color] duration-250 ease-out motion-reduce:transition-none ${
+                i === current ? 'w-5 bg-accent' : 'w-2 bg-dim'
+              }`}
+              aria-hidden
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

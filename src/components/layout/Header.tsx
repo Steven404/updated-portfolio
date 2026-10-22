@@ -1,16 +1,48 @@
 import { useState, useEffect } from 'react';
-import { Download, Menu, X } from 'lucide-react';
+import { Menu, Moon, Sun, X } from 'lucide-react';
+import { useFollowSystemTheme, useTheme } from '../../hooks/useTheme';
 
 const NAV_LINKS = [
-  { label: 'About',    href: '#about',    id: 'about' },
-  { label: 'Projects', href: '#projects', id: 'projects' },
-  { label: 'Contact',  href: '#contact',  id: 'contact' },
+  { label: 'Work',    href: '#work' },
+  { label: 'About',   href: '#about' },
+  { label: 'Contact', href: '#contact' },
 ];
+
+const RESUME_HREF = '/stefanos-michelakis-cv-english.pdf';
+
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  useFollowSystemTheme();
+
+  const label = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+
+  return (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className="theme-toggle w-11 h-11 inline-flex items-center justify-center rounded-full border border-line-strong text-fg cursor-pointer"
+      aria-label={label}
+      title={label}
+    >
+      <span className="theme-toggle-tilt relative w-5 h-5" aria-hidden>
+        <Sun
+          size={20}
+          strokeWidth={1.8}
+          className={`theme-icon absolute inset-0 ${theme === 'dark' ? 'opacity-100 rotate-0' : 'opacity-0 rotate-90'}`}
+        />
+        <Moon
+          size={20}
+          strokeWidth={1.8}
+          className={`theme-icon absolute inset-0 ${theme === 'light' ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}
+        />
+      </span>
+    </button>
+  );
+}
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen]       = useState(false);
   const [isMenuClosing, setIsMenuClosing] = useState(false);
-  const [activeSection, setActiveSection] = useState<string>('');
   const [isWobbling, setIsWobbling]       = useState(false);
   const [scrolled, setScrolled]           = useState(false);
 
@@ -25,179 +57,92 @@ export function Header() {
   const toggleMenu = () => (isMenuOpen ? closeMenu() : openMenu());
 
   useEffect(() => {
-    const HEADER_HEIGHT = 64;
-
-    const updateActive = () => {
-      const scrollY      = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const docHeight    = document.documentElement.scrollHeight;
-
-      setScrolled(scrollY > 20);
-
-      const sections = NAV_LINKS.map(({ id }) => {
-        const el = document.getElementById(id);
-        return { id, top: el ? el.getBoundingClientRect().top + scrollY : Infinity };
-      });
-
-      const nearBottom = scrollY + windowHeight >= docHeight - 4;
-      if (nearBottom) {
-        setActiveSection(sections[sections.length - 1].id);
-        return;
-      }
-
-      const passed = sections.filter(({ top }) => top <= scrollY + HEADER_HEIGHT + 10);
-      setActiveSection(passed.length === 0 ? '' : passed[passed.length - 1].id);
-    };
-
-    updateActive();
-    window.addEventListener('scroll', updateActive, { passive: true });
-    return () => window.removeEventListener('scroll', updateActive);
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   return (
     <header
-      className="sticky top-0 z-50 w-full transition-all duration-300 animate-nav-enter"
-      style={{
-        background: scrolled
-          ? 'rgba(0,49,53,0.88)'
-          : 'rgba(0,49,53,0)',
-        backdropFilter: scrolled ? 'blur(14px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(2,73,80,0.7)' : '1px solid transparent',
-      }}
+      className={`sticky top-0 z-50 w-full border-b border-line animate-nav-enter ${
+        scrolled ? 'bg-ground/90 backdrop-blur-md' : 'bg-ground'
+      }`}
     >
-      <div className="container mx-auto px-6 lg:px-16 xl:px-20 h-16 flex items-center justify-between relative">
-        {/* Logo */}
+      <nav
+        className="max-w-[1200px] mx-auto px-6 py-5 flex flex-wrap items-center justify-between gap-4"
+        aria-label="Main"
+      >
         <a
-          href="#"
+          href="#top"
           onClick={() => {
             setIsWobbling(true);
             setTimeout(() => setIsWobbling(false), 500);
           }}
-          className={`text-lg font-bold tracking-[-0.04em] z-10 inline-block select-none cursor-pointer transition-colors text-sky hover:text-teal ${isWobbling ? 'animate-wobble' : ''}`}
-          style={{ fontFamily: '"Bricolage Grotesque", sans-serif' }}
+          className={`font-display font-bold text-xl text-fg no-underline inline-block select-none ${isWobbling ? 'animate-wobble' : ''}`}
           aria-label="Back to top"
         >
-          SM
+          SM<span className="text-accent">.</span>
         </a>
 
-        {/* Desktop nav — centered absolutely */}
-        <nav
-          className="hidden md:flex gap-8 items-center absolute left-1/2 -translate-x-1/2"
-          aria-label="Primary navigation"
-        >
-          {NAV_LINKS.map(({ label, href, id }) => {
-            const isActive = activeSection === id;
-            return (
-              <a
-                key={id}
-                href={href}
-                className="nav-link text-sm font-medium inline-block"
-                style={{
-                  color: isActive ? '#0FA4AF' : 'rgba(175,221,229,0.65)',
-                  fontFamily: '"Figtree", sans-serif',
-                }}
-                onMouseEnter={e => {
-                  if (!isActive) (e.currentTarget as HTMLElement).style.color = '#AFDDE5';
-                }}
-                onMouseLeave={e => {
-                  if (!isActive) (e.currentTarget as HTMLElement).style.color = 'rgba(175,221,229,0.65)';
-                }}
-              >
+        <div className="flex items-center gap-3">
+          <div className="hidden md:flex flex-wrap items-center gap-7 text-[15px]">
+            {NAV_LINKS.map(({ label, href }) => (
+              <a key={href} href={href} className="no-underline">
                 {label}
-                <span
-                  className="block h-0.5 mt-0.5 rounded-full"
-                  style={{
-                    background: '#964734',
-                    transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
-                    transformOrigin: 'left',
-                    transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                  }}
-                  aria-hidden
-                />
               </a>
-            );
-          })}
-        </nav>
+            ))}
+            <a
+              href={RESUME_HREF}
+              download
+              className="no-underline inline-flex items-center min-h-11 px-[18px] py-2.5 rounded-full border border-line-strong"
+            >
+              Resume ↓
+            </a>
+          </div>
 
-        {/* Resume button */}
-        <a
-          href="/stefanos-michelakis-cv-english.pdf"
-          download="stefanos-michelakis-cv-english.pdf"
-          className="resume-btn hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold z-10"
-          style={{
-            background: '#964734',
-            color: '#AFDDE5',
-            fontFamily: '"Figtree", sans-serif',
-          }}
-          onMouseEnter={e => {
-            (e.currentTarget as HTMLElement).style.background = '#b05440';
-          }}
-          onMouseLeave={e => {
-            (e.currentTarget as HTMLElement).style.background = '#964734';
-          }}
-        >
-          <Download size={14} aria-hidden />
-          Resume
-        </a>
+          <ThemeToggle />
 
-        {/* Mobile toggle */}
-        <button
-          className="md:hidden p-2 transition-colors"
-          onClick={toggleMenu}
-          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={isMenuOpen}
-          style={{ color: 'rgba(175,221,229,0.7)' }}
-        >
-          <span key={isMenuOpen ? 'open' : 'closed'} className="animate-icon-swap">
-            {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
-          </span>
-        </button>
-      </div>
+          <button
+            type="button"
+            className="md:hidden w-11 h-11 inline-flex items-center justify-center rounded-full border border-line-strong text-fg cursor-pointer"
+            onClick={toggleMenu}
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu"
+          >
+            <span key={isMenuOpen ? 'open' : 'closed'} className="animate-icon-swap">
+              {isMenuOpen ? <X size={20} strokeWidth={1.8} /> : <Menu size={20} strokeWidth={1.8} />}
+            </span>
+          </button>
+        </div>
+      </nav>
 
       {/* Mobile nav */}
       {(isMenuOpen || isMenuClosing) && (
         <div
-          className={`md:hidden absolute w-full shadow-xl ${isMenuClosing ? 'animate-menu-out' : 'animate-menu-in'}`}
-          style={{
-            background: 'rgba(0,49,53,0.97)',
-            backdropFilter: 'blur(14px)',
-            borderBottom: '1px solid rgba(2,73,80,0.7)',
-          }}
+          id="mobile-menu"
+          className={`md:hidden border-t border-line px-6 pt-3 pb-6 flex flex-col text-lg ${isMenuClosing ? 'animate-menu-out' : 'animate-menu-in'}`}
         >
-          <nav className="flex flex-col px-6 py-6 gap-5" aria-label="Mobile navigation">
-            {NAV_LINKS.map(({ label, href, id }, i) => {
-              const isActive = activeSection === id;
-              return (
-                <a
-                  key={id}
-                  href={href}
-                  onClick={closeMenu}
-                  className={`text-base font-medium transition-colors${isMenuClosing ? '' : ' animate-menu-item'}`}
-                  style={{
-                    color: isActive ? '#0FA4AF' : 'rgba(175,221,229,0.75)',
-                    fontFamily: '"Figtree", sans-serif',
-                    animationDelay: isMenuClosing ? undefined : `${i * 40 + 60}ms`,
-                  }}
-                >
-                  {label}
-                </a>
-              );
-            })}
+          {NAV_LINKS.map(({ label, href }, i) => (
             <a
-              href="/stefanos-michelakis-cv-english.pdf"
-              download="stefanos-michelakis-cv-english.pdf"
+              key={href}
+              href={href}
               onClick={closeMenu}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all mt-1"
-              style={{
-                background: '#964734',
-                color: '#AFDDE5',
-                fontFamily: '"Figtree", sans-serif',
-              }}
+              className={`no-underline min-h-[52px] flex items-center ${i < NAV_LINKS.length - 1 ? 'border-b border-line' : ''}${isMenuClosing ? '' : ' animate-menu-item'}`}
+              style={{ animationDelay: isMenuClosing ? undefined : `${i * 40 + 60}ms` }}
             >
-              <Download size={16} aria-hidden />
-              Download Resume
+              {label}
             </a>
-          </nav>
+          ))}
+          <a
+            href={RESUME_HREF}
+            download
+            onClick={closeMenu}
+            className="mt-4 no-underline min-h-12 flex items-center justify-center rounded-full border border-line-strong text-base font-medium"
+          >
+            Download resume ↓
+          </a>
         </div>
       )}
     </header>

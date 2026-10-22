@@ -93,6 +93,16 @@
     color: var(--accent);
   }
 
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: var(--on-accent);
+  }
+
   section[id] {
     scroll-margin-top: 5.5rem;
   }
@@ -255,6 +265,111 @@
   animation: wobble 0.5s ease-in-out;
 }
 
+/* ── Hero entrance ─────────────────────────────────────────────────
+   One sequence: the name rises out of a mask and its full stop lands, then
+   the experience timeline draws from the first role to "now", lighting each
+   role as the line reaches it. The timeline waits, paused, until it is in
+   view (`.is-playing`, set by Hero). `--at` is the moment the line reaches a
+   role: `--line-start` plus that role's `--reach-*` offset. */
+@keyframes heroFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes heroNameRise {
+  from { transform: translateY(105%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes heroStop {
+  from { opacity: 0; transform: scale(0); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes heroLine {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes heroNode {
+  from { opacity: 0; transform: scale(0.3); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Offset comes from a variable, so crossing the breakpoint (e.g. rotating a
+   tablet) doesn't swap the keyframes and replay the entrance */
+@keyframes heroRole {
+  from { opacity: 0; transform: var(--role-from); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes heroRipple {
+  from { opacity: 0.45; transform: scale(1); }
+  to   { opacity: 0; transform: scale(3); }
+}
+
+.hero-fade {
+  animation: heroFade 0.6s ease-out both;
+}
+
+.hero-name-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+
+.hero-name {
+  display: block;
+  animation: heroNameRise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+
+.hero-stop {
+  display: inline-block;
+  transform-origin: 50% 85%;
+  animation: heroStop 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.7s both;
+}
+
+.hero-line {
+  transform-origin: left center;
+  animation: heroLine 1s cubic-bezier(0.37, 0, 0.63, 1) var(--line-start) both;
+}
+
+.hero-timeline {
+  --line-start: 650ms;
+}
+
+.hero-timeline:not(.is-playing) :is(.hero-line, .hero-node, .hero-role, .hero-ripple) {
+  animation-play-state: paused;
+}
+
+.hero-step {
+  --at: calc(var(--line-start) + var(--reach-sm));
+}
+
+.hero-node {
+  animation: heroNode 0.35s cubic-bezier(0.16, 1, 0.3, 1) var(--at) both;
+}
+
+.hero-role {
+  --role-from: translateX(-8px);
+  animation: heroRole 0.5s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--at) + 60ms) both;
+}
+
+.hero-ripple {
+  animation: heroRipple 1.4s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--at) + 250ms) 2 both;
+}
+
+@media (min-width: 48rem) {
+  .hero-step {
+    --at: calc(var(--line-start) + var(--reach-md));
+  }
+
+  .hero-role {
+    --role-from: translateY(8px);
+  }
+}
+
 /* Legacy class — kept so other sections don't break */
 .animate-fade-in-up {
   animation: revealUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -271,6 +386,22 @@
     animation: none;
     opacity: 1;
     transform: none;
+  }
+
+  /* Hero: same order and timing, opacity only */
+  .hero-name,
+  .hero-stop,
+  .hero-line,
+  .hero-node,
+  .hero-role {
+    animation-name: heroFade;
+    animation-duration: 0.4s;
+    animation-timing-function: ease-out;
+  }
+
+  .hero-ripple {
+    animation: none;
+    opacity: 0;
   }
 
   .theme-toggle-tilt,

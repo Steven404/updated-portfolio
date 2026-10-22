@@ -31,7 +31,7 @@ const NOTES_SHOTS: Record<'light' | 'dark', Screenshot[]> = {
 const NOTES_APP: ProjectInfo = {
   kicker: '01 — MOBILE',
   title: 'Offline Notes App',
-  description: 'A notes and tasks app for React Native that works fully offline.',
+  description: 'A notes and tasks app built with React Native that works fully offline.',
   tags: ['React Native', 'TypeScript'],
   links: [{ label: 'Source', href: 'https://github.com/Steven404/offline-notes-app' }],
 };
@@ -47,7 +47,8 @@ const PLATFORMER: ProjectInfo = {
 const LANGUAGE_TEACHER: ProjectInfo = {
   kicker: '03 — WEB',
   title: 'Language Teacher Portfolio',
-  tags: ['React'],
+  tags: ['React', 'Next.js', 'Tailwind CSS'],
+  description: 'A portfolio website for a language teacher built with Next.js.',
   links: [{ label: 'Source', href: 'https://github.com/Steven404/thalia-portfolio' }],
 };
 

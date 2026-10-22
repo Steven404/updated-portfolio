@@ -267,10 +267,11 @@
 
 /* ── Hero entrance ─────────────────────────────────────────────────
    One sequence: the name rises out of a mask and its full stop lands, then
-   the experience timeline draws from the first role to "now", lighting each
-   role as the line reaches it. The timeline waits, paused, until it is in
-   view (`.is-playing`, set by Hero). `--at` is the moment the line reaches a
-   role: `--line-start` plus that role's `--reach-*` offset. */
+   flies into the timeline and becomes the "now" dot (useFullStopJourney).
+   The timeline waits, paused, until then (`.is-playing`, `.is-docked` when
+   the full stop landed on it) and draws from now back to the first role,
+   lighting each role as the line reaches it. `--at` is that moment:
+   `--line-start` plus the role's measured `--reach`. */
 @keyframes heroFade {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -289,6 +290,11 @@
 @keyframes heroLine {
   from { transform: scaleX(0); }
   to   { transform: scaleX(1); }
+}
+
+@keyframes heroLineV {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
 }
 
 @keyframes heroNode {
@@ -331,20 +337,38 @@
 }
 
 .hero-line {
-  transform-origin: left center;
-  animation: heroLine 1s cubic-bezier(0.37, 0, 0.63, 1) var(--line-start) both;
+  transform-origin: right center;
+  animation: heroLine var(--line-dur) cubic-bezier(0.37, 0, 0.63, 1) var(--line-start) both;
+}
+
+.hero-line-v {
+  transform-origin: center top;
+  animation: heroLineV var(--line-dur) cubic-bezier(0.37, 0, 0.63, 1) var(--line-start) both;
 }
 
 .hero-timeline {
   --line-start: 650ms;
+  --line-dur: 1000ms;
+  --ripple-lag: 250ms;
 }
 
-.hero-timeline:not(.is-playing) :is(.hero-line, .hero-node, .hero-role, .hero-ripple) {
+.hero-timeline:not(.is-playing) :is(.hero-line, .hero-line-v, .hero-node, .hero-role, .hero-ripple) {
   animation-play-state: paused;
 }
 
+/* The full stop is the "now" dot, so it is already there: no pop, and the
+   ripple fires on impact */
+.hero-timeline.is-docked {
+  --ripple-lag: 0ms;
+}
+
+.hero-timeline.is-docked .hero-now {
+  animation: none;
+}
+
 .hero-step {
-  --at: calc(var(--line-start) + var(--reach-sm));
+  --reach: 0ms;
+  --at: calc(var(--line-start) + var(--reach));
 }
 
 .hero-node {
@@ -357,14 +381,31 @@
 }
 
 .hero-ripple {
-  animation: heroRipple 1.4s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--at) + 250ms) 2 both;
+  animation: heroRipple 1.4s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--at) + var(--ripple-lag)) 2 both;
+}
+
+/* Positioned in document coordinates by useFullStopJourney; centred on its
+   transform origin. Below the sticky header. */
+.hero-traveller {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  width: 13px;
+  height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  pointer-events: none;
+}
+
+.hero-traveller > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: var(--accent);
 }
 
 @media (min-width: 48rem) {
-  .hero-step {
-    --at: calc(var(--line-start) + var(--reach-md));
-  }
-
   .hero-role {
     --role-from: translateY(8px);
   }
@@ -392,6 +433,7 @@
   .hero-name,
   .hero-stop,
   .hero-line,
+  .hero-line-v,
   .hero-node,
   .hero-role {
     animation-name: heroFade;

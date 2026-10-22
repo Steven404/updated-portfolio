@@ -29,13 +29,13 @@ export function About() {
           </h2>
           <p className="mt-8 text-xl leading-[1.55]">
             5+ years building web and mobile products that ship to real users. My focus is React and
-            React Native, from architecture through deployment, with a soft spot for good UX and the
-            performance details that often get deprioritized.
+            React Native — from architecture through deployment, with a particular interest in good UX
+            practices and the performance details that sometimes get deprioritized in our field.
           </p>
           <p className="mt-5 text-fg-2">
-            I started building software shortly before graduating and have worked across client
-            products and personal projects ever since. I care about maintainable code and polished
-            interfaces in equal measure.
+            I started my software development career shortly before graduating and have been building
+            across client products and personal projects ever since. I care about maintainable code and
+            polished interfaces in equal measure.
           </p>
           <a
             href="/stefanos-michelakis-cv-english.pdf"

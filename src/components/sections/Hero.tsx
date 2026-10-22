@@ -77,11 +77,11 @@ export function Hero() {
       </div>
 
       <p
-        className="animate-reveal-up max-w-[820px] text-[21px] leading-[1.55] text-fg"
+        className="animate-reveal-up max-w-[820px] text-[22px] leading-[1.55] text-fg"
         style={{ animationDelay: '160ms' }}
       >
-        I build React apps and React Native mobile products that ship to real users. Five years in,
-        still sweating the small details that make an interface feel right.
+        I build React apps and React Native mobile products that ship to real users — with 5+ years
+        of production experience and a relentless eye for the small details that make the difference.
       </p>
 
       <div className="animate-reveal-up w-full" style={{ animationDelay: '260ms' }}>

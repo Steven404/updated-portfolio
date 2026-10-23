@@ -9,7 +9,8 @@ import { useEffect, useRef } from 'react';
 
 const HOLD = 250; // ms the landed full stop rests before it departs
 const DOT = 13; // px, the "now" dot's diameter
-const WAIT_GAP = 72; // px above the viewport bottom where the full stop waits
+const WAIT_GAP = 28; // px above the viewport bottom where the full stop waits
+const DOCK_MARGIN = 4; // px the "now" dot must clear the viewport bottom by to count as in view
 const FOLLOW = 0.18; // share of the remaining distance covered per frame while following
 const LINE_MS = { horizontal: 1000, vertical: 800 };
 
@@ -166,12 +167,14 @@ export function useFullStopJourney() {
         traveller.remove();
       });
 
-      // Where the full stop should be: on the "now" dot when that is in view,
-      // otherwise waiting above the bottom edge in line with it.
+      // Where the full stop should be: on the "now" dot whenever that is fully
+      // in view (even just above the bottom edge, as on short phones), otherwise
+      // waiting above the bottom edge in line with it.
       const target = () => {
         const now = centreOf(nowDot);
-        const waitY = scrollY + innerHeight - WAIT_GAP;
-        return { x: now.x, y: Math.min(now.y, waitY), docked: now.y <= waitY };
+        const bottom = scrollY + innerHeight;
+        const docked = now.y + DOT / 2 + DOCK_MARGIN <= bottom;
+        return { x: now.x, y: docked ? now.y : bottom - WAIT_GAP, docked };
       };
 
       const dock = () => {

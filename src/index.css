@@ -153,6 +153,12 @@
   transition: transform 0.25s ease, rotate 0.25s ease, opacity 0.25s ease !important;
 }
 
+/* Screenshots captured in both themes crossfade with the colours, on the
+   same curve (ScreenshotCarousel) */
+:root.theme-transition .theme-crossfade {
+  transition: opacity 0.3s cubic-bezier(0.2, 0, 0.2, 1) !important;
+}
+
 .theme-toggle:hover .theme-toggle-tilt,
 .theme-toggle:focus-visible .theme-toggle-tilt {
   transform: rotate(15deg);

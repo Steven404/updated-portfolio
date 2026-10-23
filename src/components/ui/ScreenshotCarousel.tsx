@@ -1,9 +1,12 @@
 import { useRef, useState, type KeyboardEvent, type ReactNode, type TouchEvent } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import type { Theme } from '../../hooks/useTheme';
 
+/** The same screen captured in each theme */
 export interface Screenshot {
-  src: string;
   alt: string;
+  light: string;
+  dark: string;
 }
 
 const SWIPE_THRESHOLD = 40;
@@ -21,8 +24,19 @@ function ArrowButton({ label, onClick, children }: { label: string; onClick: () 
   );
 }
 
-/** Phone-framed screenshot carousel: arrows, dots, swipe and Left/Right keys. */
-export function ScreenshotCarousel({ shots, label }: { shots: Screenshot[]; label: string }) {
+interface ScreenshotCarouselProps {
+  shots: Screenshot[];
+  theme: Theme;
+  label: string;
+}
+
+/**
+ * Phone-framed screenshot carousel: arrows, dots, swipe and Left/Right keys.
+ * Both theme captures stay mounted, light stacked over dark, so a theme
+ * switch crossfades them (see `.theme-crossfade` in index.css). Only the top
+ * layer fades, so the screen never dips through two half-transparent images.
+ */
+export function ScreenshotCarousel({ shots, theme, label }: ScreenshotCarouselProps) {
   const [current, setCurrent] = useState(0);
   const touchStartX = useRef<number | null>(null);
 
@@ -70,22 +84,30 @@ export function ScreenshotCarousel({ shots, label }: { shots: Screenshot[]; labe
           onTouchEnd={onTouchEnd}
         >
           <div className="relative h-full rounded-[30px] overflow-hidden bg-screen">
-            {shots.map((shot, i) => (
-              <img
-                key={shot.src}
-                src={shot.src}
-                alt={shot.alt}
-                aria-hidden={i !== current}
-                width={432}
-                height={911}
-                loading={i === 0 ? 'eager' : 'lazy'}
-                decoding="async"
-                draggable={false}
-                className={`absolute inset-0 w-full h-full object-cover object-top select-none transition-opacity duration-250 ease-out motion-reduce:transition-none ${
-                  i === current ? 'opacity-100' : 'opacity-0'
-                }`}
-              />
-            ))}
+            {shots.map((shot, i) => {
+              const isCurrent = i === current;
+              const layers = [
+                { src: shot.dark, shown: isCurrent, active: theme === 'dark' },
+                { src: shot.light, shown: isCurrent && theme === 'light', active: theme === 'light' },
+              ];
+              return layers.map(({ src, shown, active }) => (
+                <img
+                  key={src}
+                  src={src}
+                  // Only the capture for the current theme is announced
+                  alt={isCurrent && active ? shot.alt : ''}
+                  aria-hidden={!(isCurrent && active)}
+                  width={432}
+                  height={911}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  draggable={false}
+                  className={`theme-crossfade absolute inset-0 w-full h-full object-cover object-top select-none transition-opacity duration-250 ease-out motion-reduce:transition-none ${
+                    shown ? 'opacity-100' : 'opacity-0'
+                  }`}
+                />
+              ));
+            })}
           </div>
         </div>
 
@@ -97,7 +119,7 @@ export function ScreenshotCarousel({ shots, label }: { shots: Screenshot[]; labe
       <div className="flex items-center gap-0.5">
         {shots.map((shot, i) => (
           <button
-            key={shot.src}
+            key={shot.dark}
             type="button"
             onClick={() => go(i)}
             aria-label={`Show screenshot ${i + 1} of ${count}`}

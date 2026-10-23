@@ -23,10 +23,11 @@ const NOTES_SHOT_ALTS = [
   'Empty notes screen with an illustration and a button to add a note',
 ];
 
-const NOTES_SHOTS: Record<'light' | 'dark', Screenshot[]> = {
-  dark:  NOTES_SHOT_ALTS.map((alt, i) => ({ src: `/images/notes-dark-${i + 1}.webp`, alt })),
-  light: NOTES_SHOT_ALTS.map((alt, i) => ({ src: `/images/notes-light-${i + 1}.webp`, alt })),
-};
+const NOTES_SHOTS: Screenshot[] = NOTES_SHOT_ALTS.map((alt, i) => ({
+  alt,
+  dark: `/images/notes-dark-${i + 1}.webp`,
+  light: `/images/notes-light-${i + 1}.webp`,
+}));
 
 const NOTES_APP: ProjectInfo = {
   kicker: '01 — MOBILE',
@@ -133,7 +134,7 @@ export function Projects() {
           ref={featuredRef}
           className="opacity-0 mt-16 p-5 sm:p-10 bg-surface border border-line rounded-[20px] grid grid-cols-[repeat(auto-fit,minmax(min(100%,360px),1fr))] gap-12 items-center"
         >
-          <ScreenshotCarousel shots={NOTES_SHOTS[theme]} label="Offline Notes App screenshots" />
+          <ScreenshotCarousel shots={NOTES_SHOTS} theme={theme} label="Offline Notes App screenshots" />
           <ProjectDetails project={NOTES_APP} large />
         </article>
 

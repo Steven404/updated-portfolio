@@ -1,4 +1,5 @@
 import { useFullStopJourney } from '../../hooks/useFullStopJourney';
+import { ButtonLink } from '../ui/ButtonLink';
 
 const EXPERIENCE = [
   { role: 'Full Stack Software Engineer',  company: 'Flarmio',                   period: '2021 – 2023' },
@@ -101,10 +102,7 @@ export function Hero() {
         </h1>
       </div>
 
-      <p
-        className="animate-reveal-up max-w-[820px] text-[19px] sm:text-[22px] leading-[1.55] text-fg"
-        style={{ animationDelay: '300ms' }}
-      >
+      <p className="animate-reveal-up animate-delay-300 max-w-[820px] text-[19px] sm:text-[22px] leading-[1.55] text-fg">
         I build React apps and React Native mobile products that ship to real users — with 5+ years
         of production experience and a relentless eye for the small details that make the difference.
       </p>
@@ -113,16 +111,8 @@ export function Hero() {
         <Experience timelineRef={timelineRef} />
       </div>
 
-      <div
-        className="animate-reveal-up flex flex-wrap justify-center items-center gap-x-7 gap-y-4"
-        style={{ animationDelay: '800ms' }}
-      >
-        <a
-          href="#work"
-          className="no-underline inline-flex items-center min-h-12 px-[26px] py-3.5 rounded-full bg-accent text-on-accent font-semibold transition-[filter] hover:brightness-110"
-        >
-          See my work →
-        </a>
+      <div className="animate-reveal-up animate-delay-800 flex flex-wrap justify-center items-center gap-x-7 gap-y-4">
+        <ButtonLink href="#work">See my work →</ButtonLink>
         <a href="#contact" className="inline-flex items-center min-h-11 font-medium underline-offset-[6px]">
           Get in touch
         </a>

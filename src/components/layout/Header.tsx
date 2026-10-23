@@ -185,7 +185,6 @@ export function Header() {
               href={href}
               onClick={closeMenu}
               className={`no-underline min-h-[52px] flex items-center ${i < NAV_LINKS.length - 1 ? 'border-b border-line' : ''}${isMenuClosing ? '' : ' animate-menu-item'}`}
-              style={{ animationDelay: isMenuClosing ? undefined : `${i * 40 + 60}ms` }}
             >
               {label}
             </a>

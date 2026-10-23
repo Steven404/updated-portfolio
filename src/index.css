@@ -236,11 +236,11 @@
 }
 
 .animate-nav-enter {
-  animation: navEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: navEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 .animate-menu-in {
-  animation: menuSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: menuSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 .animate-menu-out {
@@ -248,17 +248,38 @@
 }
 
 .animate-icon-swap {
-  animation: iconSwap 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: iconSwap 0.22s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   display: inline-flex;
 }
 
 .animate-menu-item {
-  animation: menuItemIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: menuItemIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) 60ms backwards;
 }
 
-/* ── Animation classes ─────────────────────────────────────────── */
+.animate-menu-item:nth-child(2) {
+  animation-delay: 100ms;
+}
+
+.animate-menu-item:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+/* ── Animation classes ─────────────────────────────────────────────
+   Entrances fill `backwards` only: their last frame is the element's own
+   style, so nothing stays applied once they finish. Delays live here, not
+   in inline styles. Elements combining a held animation with an inline
+   delay were the ones whose colours snapped at the end of the theme fade
+   instead of following it. */
 .animate-reveal-up {
-  animation: revealUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: revealUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.animate-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animate-delay-800 {
+  animation-delay: 800ms;
 }
 
 .animate-wobble {
@@ -315,7 +336,7 @@
 }
 
 .hero-fade {
-  animation: heroFade 0.6s ease-out both;
+  animation: heroFade 0.6s ease-out backwards;
 }
 
 .hero-name-mask {
@@ -327,23 +348,23 @@
 
 .hero-name {
   display: block;
-  animation: heroNameRise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+  animation: heroNameRise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.08s backwards;
 }
 
 .hero-stop {
   display: inline-block;
   transform-origin: 50% 85%;
-  animation: heroStop 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.7s both;
+  animation: heroStop 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.7s backwards;
 }
 
 .hero-line {
   transform-origin: right center;
-  animation: heroLine var(--line-dur) cubic-bezier(0.37, 0, 0.63, 1) var(--line-start) both;
+  animation: heroLine var(--line-dur) cubic-bezier(0.37, 0, 0.63, 1) var(--line-start) backwards;
 }
 
 .hero-line-v {
   transform-origin: center top;
-  animation: heroLineV var(--line-dur) cubic-bezier(0.37, 0, 0.63, 1) var(--line-start) both;
+  animation: heroLineV var(--line-dur) cubic-bezier(0.37, 0, 0.63, 1) var(--line-start) backwards;
 }
 
 .hero-timeline {
@@ -372,12 +393,12 @@
 }
 
 .hero-node {
-  animation: heroNode 0.35s cubic-bezier(0.16, 1, 0.3, 1) var(--at) both;
+  animation: heroNode 0.35s cubic-bezier(0.16, 1, 0.3, 1) var(--at) backwards;
 }
 
 .hero-role {
   --role-from: translateX(-8px);
-  animation: heroRole 0.5s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--at) + 60ms) both;
+  animation: heroRole 0.5s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--at) + 60ms) backwards;
 }
 
 .hero-ripple {
@@ -413,7 +434,7 @@
 
 /* Legacy class — kept so other sections don't break */
 .animate-fade-in-up {
-  animation: revealUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: revealUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {

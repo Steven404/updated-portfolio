@@ -1,4 +1,5 @@
 import { useScrollFadeIn } from '../../hooks/useScrollFadeIn';
+import { ButtonLink } from '../ui/ButtonLink';
 
 const EMAIL = 'stefanosmichelakis@gmail.com';
 
@@ -16,18 +17,12 @@ export function Contact() {
           Need a frontend or React Native engineer, or just want to connect? I reply to every message.
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-3">
-          <a
-            href={`mailto:${EMAIL}?subject=${encodeURIComponent('Booking a call')}`}
-            className="no-underline inline-flex items-center min-h-12 px-[26px] py-3.5 rounded-full bg-accent text-on-accent font-semibold transition-[filter] hover:brightness-110"
-          >
+          <ButtonLink href={`mailto:${EMAIL}?subject=${encodeURIComponent('Booking a call')}`}>
             Book a call
-          </a>
-          <a
-            href={`mailto:${EMAIL}`}
-            className="no-underline inline-flex items-center min-h-12 px-6 py-[13px] rounded-full border border-line-strong hover:border-dim font-medium"
-          >
+          </ButtonLink>
+          <ButtonLink href={`mailto:${EMAIL}`} variant="secondary">
             Send me a message
-          </a>
+          </ButtonLink>
         </div>
       </div>
     </section>

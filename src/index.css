@@ -103,6 +103,10 @@
     color: var(--on-accent);
   }
 
+  :focus-visible {
+    outline-color: var(--accent);
+  }
+
   section[id] {
     scroll-margin-top: 5.5rem;
   }
@@ -339,11 +343,13 @@
   animation: heroFade 0.6s ease-out backwards;
 }
 
+/* Side room too: the negative tracking pulls the full stop's ink ~0.05em
+   past the line box, which the mask would otherwise clip */
 .hero-name-mask {
   display: block;
   overflow: hidden;
-  padding-bottom: 0.1em;
-  margin-bottom: -0.1em;
+  padding: 0 0.1em 0.1em;
+  margin: 0 -0.1em -0.1em;
 }
 
 .hero-name {
@@ -432,6 +438,166 @@
   }
 }
 
+/* ── Role triggers ─────────────────────────────────────────────────
+   Each timeline entry opens its role details. `scale` (not transform) so the
+   hover composes with the entrance animation's transform. */
+.role-trigger {
+  transform-origin: left center;
+  border-radius: 8px;
+  transition: scale 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.role-title {
+  text-decoration-color: var(--line-strong);
+  transition: text-decoration-color 0.2s ease-out;
+}
+
+@media (hover: hover) {
+  .role-trigger:hover {
+    scale: 1.03;
+  }
+
+  .role-trigger:hover .role-title {
+    text-decoration-color: var(--accent);
+  }
+}
+
+.role-trigger:focus-visible {
+  scale: 1.03;
+  outline: 2px solid var(--accent);
+  outline-offset: 6px;
+}
+
+.role-trigger:focus-visible .role-title {
+  text-decoration-color: var(--accent);
+}
+
+/* Not reachable while the timeline is still waiting to draw */
+.hero-timeline:not(.is-playing) .role-trigger {
+  visibility: hidden;
+}
+
+@media (min-width: 48rem) {
+  .role-trigger {
+    transform-origin: center top;
+  }
+}
+
+/* ── Dialog ────────────────────────────────────────────────────────
+   Native <dialog> (Dialog.tsx). Enters with @starting-style; exits on
+   `[data-closing]` before Dialog.tsx calls close(), so the exit plays in
+   every browser. Desktop: centred, fades up. Phones: a bottom sheet. The
+   backdrop's blur is fixed and only its opacity animates. */
+.dialog {
+  width: min(560px, calc(100% - 32px));
+  max-width: none;
+  max-height: calc(100dvh - 48px);
+  /* Tailwind's reset zeroes the margin the browser centres modals with */
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  color: var(--fg);
+  text-align: left;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 24px 64px -24px rgb(0 0 0 / 0.55);
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    translate 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+@starting-style {
+  .dialog[open] {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}
+
+.dialog[data-closing] {
+  opacity: 0;
+  translate: 0 8px;
+  transition-duration: 0.18s;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+
+.dialog::backdrop {
+  background-color: rgb(0 0 0 / 0.5);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  opacity: 1;
+  transition: opacity 0.22s ease-out;
+}
+
+:root[data-theme="light"] .dialog {
+  box-shadow: 0 24px 64px -24px rgb(28 27 25 / 0.35);
+}
+
+:root[data-theme="light"] .dialog::backdrop {
+  background-color: rgb(28 27 25 / 0.3);
+}
+
+@starting-style {
+  .dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+.dialog[data-closing]::backdrop {
+  opacity: 0;
+  transition-duration: 0.18s;
+}
+
+.dialog-panel {
+  position: relative;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 32px;
+}
+
+@media (max-width: 47.99rem) {
+  .dialog {
+    width: 100%;
+    max-height: 88dvh;
+    margin: auto 0 0;
+    border-bottom-width: 0;
+    border-radius: 20px 20px 0 0;
+  }
+
+  @starting-style {
+    .dialog[open] {
+      opacity: 1;
+      translate: 0 100%;
+    }
+  }
+
+  .dialog[data-closing] {
+    opacity: 1;
+    translate: 0 100%;
+    transition-duration: 0.22s;
+  }
+
+  .dialog-panel {
+    padding: 24px 20px calc(28px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Scroll lock; the gutter stays reserved so the page doesn't shift */
+html {
+  scrollbar-gutter: stable;
+}
+
+html:has(.dialog[open]) {
+  overflow: hidden;
+}
+
 /* Legacy class — kept so other sections don't break */
 .animate-fade-in-up {
   animation: revealUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards;
@@ -465,6 +631,12 @@
   .hero-ripple {
     animation: none;
     opacity: 0;
+  }
+
+  .role-trigger,
+  .dialog,
+  .dialog::backdrop {
+    transition: none;
   }
 
   .theme-toggle-tilt,

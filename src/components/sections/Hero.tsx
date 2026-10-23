@@ -1,14 +1,15 @@
+import { useState } from 'react';
+import { EXPERIENCE, type Role } from '../../data/experience';
 import { useFullStopJourney } from '../../hooks/useFullStopJourney';
 import { ButtonLink } from '../ui/ButtonLink';
+import { RoleDialog } from './RoleDialog';
 
-const EXPERIENCE = [
-  { role: 'Full Stack Software Engineer',  company: 'Flarmio',                   period: '2021 – 2023' },
-  { role: 'Full Stack Software Engineer',  company: 'Valmore Technologies',      period: '2023' },
-  { role: 'Full Stack Software Engineer',  company: 'Kanellis Development Labs', period: '2023 – 2025' },
-  { role: 'Senior React Native Developer', company: 'Base Element',              period: '2025 – now', current: true },
-];
+interface ExperienceProps {
+  timelineRef: React.Ref<HTMLDivElement>;
+  onOpenRole: (role: Role) => void;
+}
 
-function Experience({ timelineRef }: { timelineRef: React.Ref<HTMLDivElement> }) {
+function Experience({ timelineRef, onOpenRole }: ExperienceProps) {
   return (
     <div ref={timelineRef} className="hero-timeline flex flex-col items-center w-full">
       <h2 className="hero-fade inline-block pb-2 border-b-2 border-accent font-mono font-medium text-[13px] tracking-[0.08em] text-fg">
@@ -25,9 +26,9 @@ function Experience({ timelineRef }: { timelineRef: React.Ref<HTMLDivElement> })
         <div className="relative w-fit max-w-full mx-auto md:w-full">
           <span className="hero-line-v md:hidden absolute left-0 top-3 bottom-0 w-px bg-line" aria-hidden />
           <ol className="relative flex flex-col-reverse gap-[22px] text-left md:grid md:grid-cols-4 md:gap-x-6 md:gap-y-0 md:text-center">
-            {EXPERIENCE.map(({ role, company, period, current }) => (
+            {EXPERIENCE.map(({ id, role, company, period, current }, i) => (
               <li
-                key={company}
+                key={id}
                 className="hero-step relative flex flex-col items-start pl-[22px] md:items-center md:pl-0"
               >
                 {current ? (
@@ -47,25 +48,34 @@ function Experience({ timelineRef }: { timelineRef: React.Ref<HTMLDivElement> })
                     aria-hidden
                   />
                 )}
-                <div className="hero-role flex flex-col items-start md:items-center">
-                  <div
-                    className={
+                {/* The whole entry opens the role details; the dot stays out of
+                    it, so the hover scale never moves what the full stop
+                    measures */}
+                <button
+                  type="button"
+                  onClick={() => onOpenRole(EXPERIENCE[i])}
+                  aria-haspopup="dialog"
+                  className="hero-role role-trigger flex flex-col items-start text-left md:items-center md:text-center cursor-pointer"
+                >
+                  <span
+                    className={`role-title block underline decoration-1 underline-offset-[5px] text-balance ${
                       current
-                        ? 'md:mt-3.5 font-semibold text-[17px] leading-[1.35] text-balance text-fg'
-                        : 'md:mt-4 font-medium text-base leading-[1.35] text-balance text-fg-2'
-                    }
+                        ? 'md:mt-3.5 font-semibold text-[17px] leading-[1.35] text-fg'
+                        : 'md:mt-4 font-medium text-base leading-[1.35] text-fg-2'
+                    }`}
                   >
                     {role}
-                  </div>
-                  <div className={`mt-1 text-sm ${current ? 'text-fg-2' : 'text-muted'}`}>
+                  </span>
+                  <span className={`block mt-1 text-sm ${current ? 'text-fg-2' : 'text-muted'}`}>
                     {company}
                     {/* Period gets its own line in the narrow desktop columns */}
                     <span className="text-muted whitespace-nowrap md:block md:mt-0.5">
                       <span className="md:hidden"> · </span>
                       {period}
                     </span>
-                  </div>
-                </div>
+                  </span>
+                  <span className="sr-only">, details</span>
+                </button>
               </li>
             ))}
           </ol>
@@ -77,6 +87,9 @@ function Experience({ timelineRef }: { timelineRef: React.Ref<HTMLDivElement> })
 
 export function Hero() {
   const { stopRef, timelineRef } = useFullStopJourney();
+  // Kept after closing so the dialog's content stays put while it animates out
+  const [role, setRole] = useState<Role | null>(null);
+  const [roleOpen, setRoleOpen] = useState(false);
 
   return (
     <section
@@ -108,7 +121,13 @@ export function Hero() {
       </p>
 
       <div className="w-full">
-        <Experience timelineRef={timelineRef} />
+        <Experience
+          timelineRef={timelineRef}
+          onOpenRole={entry => {
+            setRole(entry);
+            setRoleOpen(true);
+          }}
+        />
       </div>
 
       <div className="animate-reveal-up animate-delay-800 flex flex-wrap justify-center items-center gap-x-7 gap-y-4">
@@ -117,6 +136,8 @@ export function Hero() {
           Get in touch
         </a>
       </div>
+
+      <RoleDialog role={role} open={roleOpen} onClose={() => setRoleOpen(false)} />
     </section>
   );
 }

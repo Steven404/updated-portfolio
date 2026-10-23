@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Menu, Moon, Sun, X } from 'lucide-react';
 import { useFollowSystemTheme, useTheme } from '../../hooks/useTheme';
 
@@ -9,6 +9,21 @@ const NAV_LINKS = [
 ];
 
 const RESUME_HREF = '/stefanos-michelakis-cv-english.pdf';
+
+// A section is current once its top passes this share of the viewport height
+const ACTIVE_LINE = 0.4;
+
+// The nav link whose section is on screen; none while the hero is.
+function currentSection() {
+  const atBottom = innerHeight + scrollY >= document.documentElement.scrollHeight - 2;
+  if (atBottom) return NAV_LINKS[NAV_LINKS.length - 1].href;
+  let current: string | null = null;
+  for (const { href } of NAV_LINKS) {
+    const top = document.querySelector(href)?.getBoundingClientRect().top;
+    if (top !== undefined && top <= innerHeight * ACTIVE_LINE) current = href;
+  }
+  return current;
+}
 
 function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
@@ -45,6 +60,8 @@ export function Header() {
   const [isMenuClosing, setIsMenuClosing] = useState(false);
   const [isWobbling, setIsWobbling]       = useState(false);
   const [scrolled, setScrolled]           = useState(false);
+  const [active, setActive]               = useState<string | null>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   const openMenu  = () => setIsMenuOpen(true);
   const closeMenu = () => {
@@ -57,14 +74,45 @@ export function Header() {
   const toggleMenu = () => (isMenuOpen ? closeMenu() : openMenu());
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      setScrolled(window.scrollY > 20);
+      setActive(currentSection());
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener('resize', onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
   }, []);
+
+  // The open menu overlays the page: Escape or a tap outside the header closes it
+  useEffect(() => {
+    if (!isMenuOpen || isMenuClosing) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeMenu();
+    };
+    const onPointer = (e: PointerEvent) => {
+      if (!headerRef.current?.contains(e.target as Node)) closeMenu();
+    };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onPointer);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onPointer);
+    };
+  });
 
   return (
     <header
+      ref={headerRef}
       className={`sticky top-0 z-50 w-full border-b border-line animate-nav-enter ${
         scrolled ? 'bg-ground/90 backdrop-blur-md' : 'bg-ground'
       }`}
@@ -88,7 +136,14 @@ export function Header() {
         <div className="flex items-center gap-3">
           <div className="hidden md:flex flex-wrap items-center gap-7 text-[15px]">
             {NAV_LINKS.map(({ label, href }) => (
-              <a key={href} href={href} className="no-underline">
+              <a
+                key={href}
+                href={href}
+                aria-current={active === href ? 'location' : undefined}
+                className={`relative no-underline after:absolute after:inset-x-0 after:-bottom-1.5 after:h-0.5 after:rounded-full after:bg-accent after:origin-left after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:after:transition-none ${
+                  active === href ? 'after:scale-x-100' : 'after:scale-x-0'
+                }`}
+              >
                 {label}
               </a>
             ))}
@@ -122,7 +177,7 @@ export function Header() {
       {(isMenuOpen || isMenuClosing) && (
         <div
           id="mobile-menu"
-          className={`md:hidden border-t border-line px-6 pt-3 pb-6 flex flex-col text-lg ${isMenuClosing ? 'animate-menu-out' : 'animate-menu-in'}`}
+          className={`md:hidden absolute inset-x-0 top-full bg-ground border-y border-line shadow-[0_16px_32px_-12px_rgb(0_0_0/0.35)] px-6 pt-3 pb-6 flex flex-col text-lg ${isMenuClosing ? 'animate-menu-out' : 'animate-menu-in'}`}
         >
           {NAV_LINKS.map(({ label, href }, i) => (
             <a

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useSyncExternalStore } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 
 export type Theme = 'light' | 'dark';
 
@@ -6,16 +6,7 @@ const STORAGE_KEY = 'theme';
 const TRANSITION_MS = 300;
 
 function readTheme(): Theme {
-  return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
-}
-
-function readStoredTheme(): Theme | null {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored === 'light' || stored === 'dark' ? stored : null;
-  } catch {
-    return null;
-  }
+  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
 }
 
 function subscribe(onChange: () => void) {
@@ -55,14 +46,3 @@ export function useTheme() {
   return { theme, toggleTheme };
 }
 
-/** Follow the OS setting until the visitor picks a theme themselves. */
-export function useFollowSystemTheme() {
-  useEffect(() => {
-    const query = window.matchMedia('(prefers-color-scheme: light)');
-    const onChange = (e: MediaQueryListEvent) => {
-      if (!readStoredTheme()) applyTheme(e.matches ? 'light' : 'dark');
-    };
-    query.addEventListener('change', onChange);
-    return () => query.removeEventListener('change', onChange);
-  }, []);
-}

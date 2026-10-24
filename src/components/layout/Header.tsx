@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Menu, Moon, Sun, X } from 'lucide-react';
-import { useFollowSystemTheme, useTheme } from '../../hooks/useTheme';
+import { useTheme } from '../../hooks/useTheme';
 
 const NAV_LINKS = [
   { label: 'Work',    href: '#work' },
@@ -27,7 +27,6 @@ function currentSection() {
 
 function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
-  useFollowSystemTheme();
 
   const label = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
 

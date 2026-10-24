@@ -32,9 +32,10 @@ interface ScreenshotCarouselProps {
 
 /**
  * Phone-framed screenshot carousel: arrows, dots, swipe and Left/Right keys.
- * Both theme captures stay mounted, light stacked over dark, so a theme
- * switch crossfades them (see `.theme-crossfade` in index.css). Only the top
- * layer fades, so the screen never dips through two half-transparent images.
+ * Both theme captures stay mounted, light stacked over dark. A theme switch
+ * fades only the light layer (`.theme-crossfade` in index.css, which only
+ * transitions during the switch), so the screen never dips through two
+ * half-transparent images; a slide change fades the whole slide.
  */
 export function ScreenshotCarousel({ shots, theme, label }: ScreenshotCarouselProps) {
   const [current, setCurrent] = useState(0);
@@ -71,7 +72,7 @@ export function ScreenshotCarousel({ shots, theme, label }: ScreenshotCarouselPr
       aria-label={label}
       tabIndex={0}
       onKeyDown={onKeyDown}
-      className="flex flex-col items-center gap-5 bg-ground rounded-[14px] px-2 sm:px-4 pt-10 pb-7 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      className="flex flex-col items-center gap-5 rounded-[14px] py-2 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
     >
       <div className="flex w-full items-center justify-center gap-3 sm:gap-5">
         <ArrowButton label="Previous screenshot" onClick={() => go(current - 1)}>
@@ -86,27 +87,35 @@ export function ScreenshotCarousel({ shots, theme, label }: ScreenshotCarouselPr
           <div className="relative h-full rounded-[30px] overflow-hidden bg-screen">
             {shots.map((shot, i) => {
               const isCurrent = i === current;
-              const layers = [
-                { src: shot.dark, shown: isCurrent, active: theme === 'dark' },
-                { src: shot.light, shown: isCurrent && theme === 'light', active: theme === 'light' },
-              ];
-              return layers.map(({ src, shown, active }) => (
-                <img
-                  key={src}
-                  src={src}
-                  // Only the capture for the current theme is announced
-                  alt={isCurrent && active ? shot.alt : ''}
-                  aria-hidden={!(isCurrent && active)}
-                  width={432}
-                  height={911}
-                  loading={i === 0 ? 'eager' : 'lazy'}
-                  decoding="async"
-                  draggable={false}
-                  className={`theme-crossfade absolute inset-0 w-full h-full object-cover object-top select-none transition-opacity duration-250 ease-out motion-reduce:transition-none ${
-                    shown ? 'opacity-100' : 'opacity-0'
+              return (
+                // Slide changes fade the whole slide as one picture, so the
+                // dark capture under the light one never shows through
+                <div
+                  key={shot.dark}
+                  aria-hidden={!isCurrent}
+                  className={`absolute inset-0 transition-opacity duration-250 ease-out motion-reduce:transition-none ${
+                    isCurrent ? 'opacity-100' : 'opacity-0'
                   }`}
-                />
-              ));
+                >
+                  {(['dark', 'light'] as const).map(layer => (
+                    <img
+                      key={layer}
+                      src={shot[layer]}
+                      // Only the capture for the current theme is announced
+                      alt={layer === theme ? shot.alt : ''}
+                      aria-hidden={layer !== theme}
+                      width={432}
+                      height={911}
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
+                      draggable={false}
+                      className={`absolute inset-0 w-full h-full object-cover object-top select-none ${
+                        layer === 'light' ? `theme-crossfade ${theme === 'light' ? 'opacity-100' : 'opacity-0'}` : ''
+                      }`}
+                    />
+                  ))}
+                </div>
+              );
             })}
           </div>
         </div>

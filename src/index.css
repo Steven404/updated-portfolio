@@ -2,24 +2,9 @@
 
 /* ── Theme tokens ──────────────────────────────────────────────────
    Every colour lives in a CSS variable per theme, so switching themes
-   only flips `data-theme` on <html> (set before first paint in index.html). */
+   only flips `data-theme` on <html> (set before first paint in index.html).
+   Light is the default, also before that script has run. */
 :root,
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --ground: #141413;
-  --surface: #1E1D1B;
-  --surface-2: #26251F;
-  --screen: #262626;
-  --line: #2C2B28;
-  --line-strong: #3A3934;
-  --dim: #5A5852;
-  --fg: #ECE9E3;
-  --fg-2: #C9C5BD;
-  --muted: #8F8B84;
-  --accent: #C6F432;
-  --on-accent: #141413;
-}
-
 :root[data-theme="light"] {
   color-scheme: light;
   --ground: #F2EEE6;
@@ -34,6 +19,22 @@
   --muted: #6E6A62;
   --accent: #1F4E8C;
   --on-accent: #FFFFFF;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #141413;
+  --surface: #1E1D1B;
+  --surface-2: #26251F;
+  --screen: #262626;
+  --line: #2C2B28;
+  --line-strong: #3A3934;
+  --dim: #5A5852;
+  --fg: #ECE9E3;
+  --fg-2: #C9C5BD;
+  --muted: #8F8B84;
+  --accent: #C6F432;
+  --on-accent: #141413;
 }
 
 @theme inline {
@@ -119,18 +120,18 @@
    lockstep. Element-level transitions are paused meanwhile: an element's own
    colour transition (e.g. the link hover fade) restarts on every frame while
    the token it reads is animating, so it lags behind and then snaps. */
-@property --ground      { syntax: "<color>"; inherits: true; initial-value: #141413; }
-@property --surface     { syntax: "<color>"; inherits: true; initial-value: #1E1D1B; }
-@property --surface-2   { syntax: "<color>"; inherits: true; initial-value: #26251F; }
-@property --screen      { syntax: "<color>"; inherits: true; initial-value: #262626; }
-@property --line        { syntax: "<color>"; inherits: true; initial-value: #2C2B28; }
-@property --line-strong { syntax: "<color>"; inherits: true; initial-value: #3A3934; }
-@property --dim         { syntax: "<color>"; inherits: true; initial-value: #5A5852; }
-@property --fg          { syntax: "<color>"; inherits: true; initial-value: #ECE9E3; }
-@property --fg-2        { syntax: "<color>"; inherits: true; initial-value: #C9C5BD; }
-@property --muted       { syntax: "<color>"; inherits: true; initial-value: #8F8B84; }
-@property --accent      { syntax: "<color>"; inherits: true; initial-value: #C6F432; }
-@property --on-accent   { syntax: "<color>"; inherits: true; initial-value: #141413; }
+@property --ground      { syntax: "<color>"; inherits: true; initial-value: #F2EEE6; }
+@property --surface     { syntax: "<color>"; inherits: true; initial-value: #FBF9F4; }
+@property --surface-2   { syntax: "<color>"; inherits: true; initial-value: #E9E4DA; }
+@property --screen      { syntax: "<color>"; inherits: true; initial-value: #F4F4F4; }
+@property --line        { syntax: "<color>"; inherits: true; initial-value: #DAD4C8; }
+@property --line-strong { syntax: "<color>"; inherits: true; initial-value: #CFC8BA; }
+@property --dim         { syntax: "<color>"; inherits: true; initial-value: #A8A196; }
+@property --fg          { syntax: "<color>"; inherits: true; initial-value: #1C1B19; }
+@property --fg-2        { syntax: "<color>"; inherits: true; initial-value: #45423C; }
+@property --muted       { syntax: "<color>"; inherits: true; initial-value: #6E6A62; }
+@property --accent      { syntax: "<color>"; inherits: true; initial-value: #1F4E8C; }
+@property --on-accent   { syntax: "<color>"; inherits: true; initial-value: #FFFFFF; }
 
 :root.theme-transition {
   transition-property:

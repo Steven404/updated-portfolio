@@ -29,7 +29,7 @@ Visitors mostly arrive by clicking the site link on Stefanos's CV, LinkedIn prof
 ## Capabilities and Constraints
 
 - Single-page site: header, hero with work-experience timeline, selected work, about (skills, education), contact, footer.
-- Light and dark themes; follows the OS until the visitor chooses, choice persisted.
+- Light and dark themes; light by default until the visitor chooses, choice persisted.
 - Contact is by mailto links (no form, no backend). LinkedIn and GitHub linked from the footer.
 - Stack: React 19, TypeScript, Vite, Tailwind CSS v4. Static build.
 

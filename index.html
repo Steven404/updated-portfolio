@@ -6,15 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stefanos Michelakis</title>
     <script>
-      // Apply the saved (or OS) theme before first paint to avoid a flash.
+      // Apply the saved theme (light by default) before first paint to avoid a flash.
       (function () {
         var theme;
         try {
           theme = localStorage.getItem('theme');
         } catch (e) {}
-        if (theme !== 'light' && theme !== 'dark') {
-          theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        }
+        if (theme !== 'light' && theme !== 'dark') theme = 'light';
         document.documentElement.dataset.theme = theme;
       })();
     </script>

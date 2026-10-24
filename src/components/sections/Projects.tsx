@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import { useScrollFadeIn } from '../../hooks/useScrollFadeIn';
 import { useTheme } from '../../hooks/useTheme';
+import { ButtonLink } from '../ui/ButtonLink';
 import { ScreenshotCarousel, type Screenshot } from '../ui/ScreenshotCarousel';
 
 interface ProjectLink {
   label: string;
   href: string;
+  /** The project's main action, shown as a pill */
+  primary?: boolean;
 }
 
 interface ProjectInfo {
-  kicker: string;
   title: string;
   description?: string;
-  tags: string[];
   links: ProjectLink[];
 }
 
@@ -30,56 +31,67 @@ const NOTES_SHOTS: Screenshot[] = NOTES_SHOT_ALTS.map((alt, i) => ({
 }));
 
 const NOTES_APP: ProjectInfo = {
-  kicker: '01 — MOBILE',
   title: 'Offline Notes App',
-  description: 'A notes and tasks app built with React Native that works fully offline.',
-  tags: ['React Native', 'TypeScript'],
-  links: [{ label: 'Source', href: 'https://github.com/Steven404/offline-notes-app' }],
+  description:
+    'A notes and tasks app I built in React Native and TypeScript that works fully offline. Everything is stored on the device with AsyncStorage, and I used Reanimated to keep the interface smooth.',
+  links: [{ label: 'Source on GitHub', href: 'https://github.com/Steven404/offline-notes-app' }],
 };
 
 const PLATFORMER: ProjectInfo = {
-  kicker: '02 — GAME',
   title: '2D Platformer',
-  description: 'A complete 2D platformer built in Unity with C#. Every sprite hand-drawn in Photoshop.',
-  tags: ['Unity', 'C#', 'Pixel art'],
-  links: [{ label: 'Source', href: 'https://github.com/Steven404/2D-Platformer' }],
+  description:
+    'A complete 2D platformer in Unity and C#. Pixel art made by hand in photoshop.',
+  links: [{ label: 'Source on GitHub', href: 'https://github.com/Steven404/2D-Platformer' }],
 };
 
 const LANGUAGE_TEACHER: ProjectInfo = {
-  kicker: '03 — WEB',
   title: 'Language Teacher Portfolio',
-  tags: ['React', 'Next.js', 'Tailwind CSS'],
-  description: 'A portfolio website for a language teacher built with Next.js.',
-  links: [{ label: 'Source', href: 'https://github.com/Steven404/thalia-portfolio' }],
+  links: [
+    { label: 'Visit the live site', href: 'https://english-with-thalia.site/', primary: true },
+    { label: 'Source on GitHub', href: 'https://github.com/Steven404/thalia-portfolio' },
+  ],
 };
 
 function ProjectDetails({ project, large = false }: { project: ProjectInfo; large?: boolean }) {
   return (
     <div>
-      <div className="font-mono text-[13px] text-accent tracking-[0.06em]">{project.kicker}</div>
+      {/* The hero's accent full stop closes every project title */}
       <h3
-        className={`font-display font-bold tracking-[-0.02em] ${
-          large ? 'mt-3.5 text-4xl leading-[1.1]' : 'mt-3 text-[28px] leading-[1.15]'
+        className={`font-display font-bold tracking-[-0.025em] text-balance ${
+          large ? 'text-[clamp(32px,4vw,44px)] leading-[1.05]' : 'text-[30px] leading-[1.1]'
         }`}
       >
         {project.title}
+        <span className="text-accent">.</span>
       </h3>
       {project.description && (
-        <p className={`${large ? 'mt-4' : 'mt-3'} text-fg-2`}>{project.description}</p>
+        <p className={`mt-4 text-fg-2 text-pretty ${large ? 'text-lg max-w-[46ch]' : 'max-w-[52ch]'}`}>
+          {project.description}
+        </p>
       )}
-      <ul className={`${large ? 'mt-6' : 'mt-5'} flex flex-wrap gap-2 font-mono text-[13px]`}>
-        {project.tags.map(tag => (
-          <li key={tag} className="border border-line-strong rounded-full px-3 py-[5px]">
-            {tag}
-          </li>
-        ))}
-      </ul>
-      <div className={`${large ? 'mt-7' : 'mt-6'} flex flex-wrap gap-6 font-medium`}>
-        {project.links.map(({ label, href }) => (
-          <a key={href} href={href} target="_blank" rel="noopener noreferrer">
-            {label} ↗
-          </a>
-        ))}
+      <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+        {project.links.map(({ label, href, primary }) => {
+          const content = (
+            <>
+              {label} ↗<span className="sr-only">, {project.title} (opens in a new tab)</span>
+            </>
+          );
+          return primary ? (
+            <ButtonLink key={href} href={href} target="_blank" rel="noopener noreferrer" variant="secondary">
+              {content}
+            </ButtonLink>
+          ) : (
+            <a
+              key={href}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center min-h-11 font-medium underline-offset-4"
+            >
+              {content}
+            </a>
+          );
+        })}
       </div>
     </div>
   );
@@ -129,44 +141,36 @@ export function Projects() {
           </a>
         </div>
 
-        {/* Project 01 */}
+        {/* Open layout split by hairline rules, like About and Contact */}
         <article
           ref={featuredRef}
-          className="opacity-0 mt-16 p-5 sm:p-10 bg-surface border border-line rounded-[20px] grid grid-cols-[repeat(auto-fit,minmax(min(100%,360px),1fr))] gap-12 items-center"
+          className="opacity-0 mt-14 pt-12 border-t border-line grid gap-10 md:grid-cols-2 md:gap-16 items-center"
         >
-          <ScreenshotCarousel shots={NOTES_SHOTS} theme={theme} label="Offline Notes App screenshots" />
-          <ProjectDetails project={NOTES_APP} large />
+          {/* Phones: say what it is before showing it */}
+          <div className="md:order-2">
+            <ProjectDetails project={NOTES_APP} large />
+          </div>
+          <div className="md:order-1">
+            <ScreenshotCarousel shots={NOTES_SHOTS} theme={theme} label="Offline Notes App screenshots" />
+          </div>
         </article>
 
-        {/* Project 02 + 03 */}
-        <div
-          ref={gridRef}
-          className="opacity-0 mt-6 grid grid-cols-[repeat(auto-fit,minmax(min(100%,420px),1fr))] gap-6"
-        >
-          <article className="p-6 sm:p-8 bg-surface border border-line rounded-[20px] flex flex-col gap-6">
+        <div ref={gridRef} className="opacity-0 mt-16 grid gap-x-12 gap-y-16 md:grid-cols-2">
+          <article className="pt-12 border-t border-line flex flex-col gap-8">
             <PlatformerVideo />
             <ProjectDetails project={PLATFORMER} />
           </article>
 
-          <article className="p-6 sm:p-8 bg-surface border border-line rounded-[20px] flex flex-col gap-6">
-            <div className="aspect-video rounded-xl bg-surface-2 border border-line flex flex-col overflow-hidden">
-              <div className="h-7 shrink-0 border-b border-line flex items-center gap-1.5 px-3" aria-hidden>
-                <span className="w-2 h-2 rounded-full bg-line-strong" />
-                <span className="w-2 h-2 rounded-full bg-line-strong" />
-                <span className="w-2 h-2 rounded-full bg-line-strong" />
-              </div>
-              <div className="grow min-h-0 bg-[#FEF5EA]">
-                <img
-                  src="/images/language-teacher.webp"
-                  alt="Homepage of the language teacher site: headline “Your English Learning Journey Starts Here.” beside the English Lessons logo"
-                  width={1100}
-                  height={573}
-                  loading="lazy"
-                  decoding="async"
-                  className="block w-full h-full object-cover object-top"
-                />
-              </div>
-            </div>
+          <article className="pt-12 border-t border-line flex flex-col gap-8">
+            <img
+              src="/images/language-teacher.webp"
+              alt="Homepage of the language teacher site: headline “Your English Learning Journey Starts Here.” beside the English Lessons logo"
+              width={1100}
+              height={573}
+              loading="lazy"
+              decoding="async"
+              className="block w-full aspect-video object-cover object-top rounded-xl border border-line"
+            />
             <ProjectDetails project={LANGUAGE_TEACHER} />
           </article>
         </div>

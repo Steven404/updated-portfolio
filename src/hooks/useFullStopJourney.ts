@@ -4,6 +4,8 @@ import { useEffect, useRef } from 'react';
 // and becomes its "now" dot; the timeline then draws back from now to the
 // first role. If the "now" dot is off-screen, the full stop waits above the
 // bottom edge, follows the scroll and settles once the dot is in view.
+// The page holds still until the full stop departs, since scrolling it away
+// first would skip the journey; trying to scroll cuts the hold short.
 // Reduced motion, missing Web Animations support, or a full stop already
 // scrolled away fall back to playing the timeline when it comes into view.
 
@@ -92,6 +94,37 @@ function arc(from: Point, to: Point, steps = 24) {
 
 const at = ({ x, y }: Point) => `translate(${x}px, ${y}px)`;
 
+const SCROLL_KEYS = new Set([' ', 'PageDown', 'PageUp', 'ArrowDown', 'ArrowUp', 'Home', 'End']);
+
+// Holds the page at its current scroll, calling `onAttempt` whenever the
+// visitor tries to scroll. Wheel, touch and keys are blocked outright; any
+// other scroll (a scrollbar drag) is put back. A click lets go, so a link
+// pressed during the hold still takes the visitor where it points.
+function holdScroll(onAttempt: () => void) {
+  const y = scrollY;
+  const block = (event: Event) => {
+    if (event instanceof KeyboardEvent && !SCROLL_KEYS.has(event.key)) return;
+    event.preventDefault();
+    onAttempt();
+  };
+  const restore = () => {
+    if (scrollY !== y) scrollTo({ top: y, behavior: 'instant' });
+  };
+  const release = () => {
+    removeEventListener('wheel', block);
+    removeEventListener('touchmove', block);
+    removeEventListener('keydown', block);
+    removeEventListener('scroll', restore);
+    removeEventListener('click', release, true);
+  };
+  addEventListener('wheel', block, { passive: false });
+  addEventListener('touchmove', block, { passive: false });
+  addEventListener('keydown', block);
+  addEventListener('scroll', restore, { passive: true });
+  addEventListener('click', release, true);
+  return release;
+}
+
 export function useFullStopJourney() {
   const stopRef = useRef<HTMLSpanElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -136,7 +169,11 @@ export function useFullStopJourney() {
       return () => cleanups.forEach(fn => fn());
     }
 
+    let releaseScroll = () => {};
+
     const depart = () => {
+      // In flight, scrolling is followed rather than lost
+      releaseScroll();
       const ink = inkOf(stop);
       const headerBottom = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0;
       if (!ink || ink.top < headerBottom || ink.top > innerHeight) {
@@ -277,9 +314,21 @@ export function useFullStopJourney() {
       },
       () => {}
     );
+    // Only while the name is on screen; a page opened further down scrolls freely.
+    // A scroll during the hold after the landing departs at once.
+    const heading = stop.closest('h1')?.getBoundingClientRect();
+    if (heading && heading.bottom > 0 && heading.top < innerHeight) {
+      releaseScroll = holdScroll(() => {
+        if (!timer) return;
+        clearTimeout(timer);
+        timer = 0;
+        depart();
+      });
+    }
     cleanups.push(() => {
       cancelled = true;
       clearTimeout(timer);
+      releaseScroll();
     });
     return () => cleanups.forEach(fn => fn());
   }, []);

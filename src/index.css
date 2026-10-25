@@ -254,8 +254,8 @@
   background-color: transparent;
   backdrop-filter: blur(0);
   transition:
-    background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-    backdrop-filter 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    background-color 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    backdrop-filter 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Scrolled: the page shows through, tinted with the accent and blurred */

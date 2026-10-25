@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { useScrollFadeIn } from '../../hooks/useScrollFadeIn';
 import { useTheme } from '../../hooks/useTheme';
 import { ButtonLink } from '../ui/ButtonLink';
@@ -97,11 +97,25 @@ function ProjectDetails({ project, large = false }: { project: ProjectInfo; larg
   );
 }
 
+const REDUCE_MOTION = '(prefers-reduced-motion: reduce)';
+
 function PlatformerVideo() {
-  const [reduceMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  // The prerendered HTML assumes reduced motion (controls, no autoplay), so
+  // nothing plays before hydration can check the real preference
+  const reduceMotion = useSyncExternalStore(
+    () => () => {},
+    () => matchMedia(REDUCE_MOTION).matches,
+    () => true,
+  );
+
+  useEffect(() => {
+    if (!reduceMotion) videoRef.current?.play().catch(() => {});
+  }, [reduceMotion]);
 
   return (
     <video
+      ref={videoRef}
       src="/images/platformer.mp4"
       poster="/images/platformer-poster.webp"
       aria-label="Gameplay from the 2D platformer: a pixel-art character running and jumping across snow, rain and forest levels while collecting coins"

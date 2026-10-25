@@ -1,14 +1,28 @@
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { useScrollFadeIn } from '../../hooks/useScrollFadeIn';
 import { ButtonLink } from '../ui/ButtonLink';
 import { BookCallDialog } from './BookCallDialog';
 
-const EMAIL = 'stefanosmichelakis@gmail.com';
+// The address as character codes, so it never appears as plain text in the
+// prerendered HTML or the JS bundle, where spam bots harvest it
+const EMAIL_CODES = [
+  115, 116, 101, 102, 97, 110, 111, 115, 109, 105, 99, 104, 101, 108, 97, 107, 105, 115, 64, 103, 109, 97,
+  105, 108, 46, 99, 111, 109,
+];
 const CAL_LINK = 'stefanos-michelakis-9okskj';
+
+const noSubscribe = () => () => {};
+const mailtoHref = () => `mailto:${String.fromCharCode(...EMAIL_CODES)}`;
+
+/** The mailto link, assembled only in the browser; the prerendered HTML gets "#". */
+function useMailtoHref() {
+  return useSyncExternalStore(noSubscribe, mailtoHref, () => '#');
+}
 
 export function Contact() {
   const contentRef = useScrollFadeIn<HTMLDivElement>(0.05);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const emailHref = useMailtoHref();
 
   return (
     <section id="contact" className="border-t border-line">
@@ -33,7 +47,7 @@ export function Contact() {
           >
             Book a call
           </ButtonLink>
-          <ButtonLink href={`mailto:${EMAIL}`} variant="secondary">
+          <ButtonLink href={emailHref} variant="secondary">
             Send me a message
           </ButtonLink>
         </div>

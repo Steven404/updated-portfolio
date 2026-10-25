@@ -31,7 +31,8 @@ function applyTheme(theme: Theme) {
 
 /** The current theme, shared by every caller (it lives on <html data-theme>). */
 export function useTheme() {
-  const theme = useSyncExternalStore(subscribe, readTheme);
+  // The prerendered HTML is light; hydration then picks up the saved theme
+  const theme = useSyncExternalStore(subscribe, readTheme, (): Theme => 'light');
 
   const toggleTheme = useCallback(() => {
     const next: Theme = readTheme() === 'dark' ? 'light' : 'dark';

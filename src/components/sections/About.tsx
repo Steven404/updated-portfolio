@@ -60,17 +60,24 @@ export function About() {
           </ul>
         </div>
 
-        <div ref={skillsRef} className="opacity-0 grid grid-cols-2 gap-x-6 gap-y-8 content-start">
-          {SKILL_GROUPS.map(({ category, skills }) => (
-            <div key={category}>
-              <div className="font-mono text-xs text-muted tracking-[0.08em] uppercase">{category}</div>
-              <ul className="mt-2.5 leading-[1.8]">
-                {skills.map(skill => (
-                  <li key={skill}>{skill}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        <div ref={skillsRef} className="opacity-0">
+          <h3 className="inline-block pb-2 border-b-2 border-accent font-mono font-medium text-[13px] tracking-[0.08em] text-fg">
+            SKILLS
+          </h3>
+          <div className="mt-7 grid grid-cols-2 gap-x-6 gap-y-9">
+            {SKILL_GROUPS.map(({ category, skills }) => (
+              <div key={category}>
+                <h4 className="font-display font-bold text-xl leading-tight tracking-[-0.015em]">
+                  {category}
+                </h4>
+                <ul className="mt-2 leading-[1.8] text-fg-2">
+                  {skills.map(skill => (
+                    <li key={skill}>{skill}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -1,10 +1,14 @@
+import { useState } from 'react';
 import { useScrollFadeIn } from '../../hooks/useScrollFadeIn';
 import { ButtonLink } from '../ui/ButtonLink';
+import { BookCallDialog } from './BookCallDialog';
 
 const EMAIL = 'stefanosmichelakis@gmail.com';
+const CAL_LINK = 'stefanos-michelakis-9okskj';
 
 export function Contact() {
   const contentRef = useScrollFadeIn<HTMLDivElement>(0.05);
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   return (
     <section id="contact" className="border-t border-line">
@@ -17,7 +21,16 @@ export function Contact() {
           Need a frontend or React Native engineer, or just want to connect? I reply to every message.
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-3">
-          <ButtonLink href={`mailto:${EMAIL}?subject=${encodeURIComponent('Booking a call')}`}>
+          {/* A real link, so a modified click still opens Cal.com in a new tab */}
+          <ButtonLink
+            href={`https://cal.com/${CAL_LINK}`}
+            aria-haspopup="dialog"
+            onClick={e => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              e.preventDefault();
+              setBookingOpen(true);
+            }}
+          >
             Book a call
           </ButtonLink>
           <ButtonLink href={`mailto:${EMAIL}`} variant="secondary">
@@ -25,6 +38,8 @@ export function Contact() {
           </ButtonLink>
         </div>
       </div>
+
+      <BookCallDialog calLink={CAL_LINK} open={bookingOpen} onClose={() => setBookingOpen(false)} />
     </section>
   );
 }

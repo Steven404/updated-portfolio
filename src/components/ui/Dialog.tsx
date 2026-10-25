@@ -6,6 +6,8 @@ interface DialogProps {
   open: boolean;
   onClose: () => void;
   labelledBy: string;
+  /** Room for wider content, like an embedded booking page */
+  wide?: boolean;
   children: ReactNode;
 }
 
@@ -15,7 +17,7 @@ interface DialogProps {
  * (closed only once it has played, in every browser), click-outside to close
  * and the scroll lock (see `.dialog` in index.css).
  */
-export function Dialog({ open, onClose, labelledBy, children }: DialogProps) {
+export function Dialog({ open, onClose, labelledBy, wide = false, children }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const pressedBackdrop = useRef(false);
 
@@ -47,15 +49,17 @@ export function Dialog({ open, onClose, labelledBy, children }: DialogProps) {
     <dialog
       ref={ref}
       aria-labelledby={labelledBy}
-      className="dialog"
+      className={wide ? 'dialog dialog-wide' : 'dialog'}
       // Escape: play the exit instead of vanishing
       onCancel={e => {
         e.preventDefault();
         onClose();
       }}
-      // Closed by the browser regardless (e.g. a repeated Escape): stay in sync
-      onClose={() => {
-        if (open) onClose();
+      // Closed by the browser regardless (e.g. a repeated Escape): stay in sync.
+      // The event arrives a task later, so one from the previous close can land
+      // after a quick reopen; only a dialog that is still closed counts.
+      onClose={e => {
+        if (open && !e.currentTarget.open) onClose();
       }}
       // The panel fills the dialog box, so a press on the dialog itself is on
       // the backdrop. Both ends must be there, so a text selection dragged out

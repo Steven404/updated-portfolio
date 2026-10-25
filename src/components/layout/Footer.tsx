@@ -14,7 +14,7 @@ export function Footer() {
             LinkedIn
           </a>
         </div>
-        <div className="font-mono text-xs">Built with React · Bricolage Grotesque &amp; Figtree</div>
+        <div className="font-mono text-xs">Built with love by me :D</div>
       </div>
     </footer>
   );

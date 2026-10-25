@@ -311,6 +311,19 @@
   animation: wobble 0.5s ease-in-out;
 }
 
+/* Carousel autoplay: the current dot fills over one slide's duration, and
+   its animationend advances the slide, so the bar and the slide never drift.
+   Kept under reduced motion: it is a progress indicator, not decoration. */
+@keyframes slideProgress {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.animate-slide-progress {
+  transform-origin: left;
+  animation: slideProgress var(--slide-duration, 5s) linear both;
+}
+
 /* ── Hero entrance ─────────────────────────────────────────────────
    One sequence: the name rises out of a mask and its full stop lands, then
    flies into the timeline and becomes the "now" dot (useFullStopJourney).

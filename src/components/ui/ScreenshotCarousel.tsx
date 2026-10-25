@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent, type ReactNode, type TouchEvent } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode, type TouchEvent } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Theme } from '../../hooks/useTheme';
 
@@ -10,6 +10,10 @@ export interface Screenshot {
 }
 
 const SWIPE_THRESHOLD = 40;
+/** How long each screenshot shows before autoplay advances */
+const SLIDE_MS = 5000;
+/** How long autoplay stays off after the visitor takes control */
+const PAUSE_MS = 20000;
 
 function ArrowButton({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
   return (
@@ -32,6 +36,9 @@ interface ScreenshotCarouselProps {
 
 /**
  * Phone-framed screenshot carousel: arrows, dots, swipe and Left/Right keys.
+ * It autoplays, the current dot filling as the slide's time runs out; any
+ * interaction (including a tap on the screen) turns autoplay off for
+ * PAUSE_MS, after which the current slide gets a fresh full duration.
  * Both theme captures stay mounted, light stacked over dark. A theme switch
  * fades only the light layer (`.theme-crossfade` in index.css, which only
  * transitions during the switch), so the screen never dips through two
@@ -39,10 +46,26 @@ interface ScreenshotCarouselProps {
  */
 export function ScreenshotCarousel({ shots, theme, label }: ScreenshotCarouselProps) {
   const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
+  const resumeTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => () => window.clearTimeout(resumeTimer.current), []);
 
   const count = shots.length;
-  const go = (index: number) => setCurrent((index + count) % count);
+  const advance = (index: number) => setCurrent((index + count) % count);
+
+  // Every interaction restarts the pause window
+  const pause = () => {
+    setPaused(true);
+    window.clearTimeout(resumeTimer.current);
+    resumeTimer.current = window.setTimeout(() => setPaused(false), PAUSE_MS);
+  };
+
+  const go = (index: number) => {
+    pause();
+    advance(index);
+  };
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'ArrowLeft') {
@@ -83,6 +106,7 @@ export function ScreenshotCarousel({ shots, theme, label }: ScreenshotCarouselPr
           className="w-full min-w-0 max-w-[240px] aspect-[12/25] rounded-[40px] border border-line-strong bg-surface p-3 touch-pan-y"
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
+          onClick={pause}
         >
           <div className="relative h-full rounded-[30px] overflow-hidden bg-screen">
             {shots.map((shot, i) => {
@@ -136,11 +160,22 @@ export function ScreenshotCarousel({ shots, theme, label }: ScreenshotCarouselPr
             className="w-7 h-7 inline-flex items-center justify-center cursor-pointer"
           >
             <span
-              className={`block h-2 rounded-full transition-[width,background-color] duration-250 ease-out motion-reduce:transition-none ${
-                i === current ? 'w-5 bg-accent' : 'w-2 bg-dim'
+              className={`relative block h-2 overflow-hidden rounded-full bg-dim transition-[width] duration-250 ease-out motion-reduce:transition-none ${
+                i === current ? 'w-5' : 'w-2'
               }`}
               aria-hidden
-            />
+            >
+              {i === current && (
+                // Keyed by slide so each one restarts the fill; while paused
+                // the dot just shows full
+                <span
+                  key={current}
+                  className={`absolute inset-0 bg-accent ${paused ? '' : 'animate-slide-progress'}`}
+                  style={{ '--slide-duration': `${SLIDE_MS}ms` } as CSSProperties}
+                  onAnimationEnd={() => advance(current + 1)}
+                />
+              )}
+            </span>
           </button>
         ))}
       </div>

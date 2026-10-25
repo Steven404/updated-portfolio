@@ -250,6 +250,20 @@
   animation: navEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
+.site-header {
+  background-color: transparent;
+  backdrop-filter: blur(0);
+  transition:
+    background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    backdrop-filter 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Scrolled: the page shows through, tinted with the accent and blurred */
+.site-header[data-scrolled="true"] {
+  background-color: color-mix(in oklab, color-mix(in oklab, var(--accent) 20%, var(--ground)) 70%, transparent);
+  backdrop-filter: blur(16px) saturate(1.4);
+}
+
 .animate-menu-in {
   animation: menuSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
@@ -516,6 +530,23 @@
     translate 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Before the phone sheet below, which still takes the full width */
+.dialog-wide {
+  width: min(1000px, calc(100% - 32px));
+}
+
+/* Short laptop windows: a little less air, so tall content like the booking
+   calendar fits without a sliver of scroll */
+@media (min-width: 48rem) and (max-height: 760px) {
+  .dialog-wide {
+    max-height: calc(100dvh - 32px);
+  }
+
+  .dialog-wide .dialog-panel {
+    padding-block: 24px;
+  }
+}
+
 .dialog[open] {
   display: flex;
   flex-direction: column;
@@ -621,6 +652,10 @@ html:has(.dialog[open]) {
     animation: none;
     opacity: 1;
     transform: none;
+  }
+
+  .site-header {
+    transition: none;
   }
 
   /* Hero: same order and timing, opacity only */

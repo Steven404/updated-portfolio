@@ -112,9 +112,8 @@ export function Header() {
   return (
     <header
       ref={headerRef}
-      className={`sticky top-0 z-50 w-full border-b border-line animate-nav-enter ${
-        scrolled ? 'bg-ground/90 backdrop-blur-md' : 'bg-ground'
-      }`}
+      data-scrolled={scrolled}
+      className="site-header sticky top-0 z-50 w-full animate-nav-enter"
     >
       <nav
         className="max-w-[1200px] mx-auto px-6 py-5 flex flex-wrap items-center justify-between gap-4"
@@ -176,7 +175,7 @@ export function Header() {
       {(isMenuOpen || isMenuClosing) && (
         <div
           id="mobile-menu"
-          className={`md:hidden absolute inset-x-0 top-full bg-ground border-y border-line shadow-[0_16px_32px_-12px_rgb(0_0_0/0.35)] px-6 pt-3 pb-6 flex flex-col text-lg ${isMenuClosing ? 'animate-menu-out' : 'animate-menu-in'}`}
+          className={`md:hidden absolute inset-x-0 top-full bg-ground border-b border-line shadow-[0_16px_32px_-12px_rgb(0_0_0/0.35)] px-6 pt-3 pb-6 flex flex-col text-lg ${isMenuClosing ? 'animate-menu-out' : 'animate-menu-in'}`}
         >
           {NAV_LINKS.map(({ label, href }, i) => (
             <a

@@ -27,6 +27,10 @@ function applyTheme(theme: Theme) {
     transitionTimer = setTimeout(() => root.classList.remove('theme-transition'), TRANSITION_MS);
   }
   root.dataset.theme = theme;
+
+  // Browsers re-fetch the tab icon when the link's href changes
+  const favicon = document.getElementById('favicon') as HTMLLinkElement | null;
+  if (favicon) favicon.href = `/favicon-${theme}.svg`;
 }
 
 /** The current theme, shared by every caller (it lives on <html data-theme>). */

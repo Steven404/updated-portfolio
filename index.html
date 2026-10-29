@@ -11,7 +11,8 @@
     <meta name="author" content="Stefanos Michelakis" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href="https://www.stefanos-michelakis.gr/" />
-    <link rel="icon" type="image/png" href="/favicon-sm.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png" />
+    <link id="favicon" rel="icon" type="image/svg+xml" href="/favicon-light.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#F2EEE6" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#141413" media="(prefers-color-scheme: dark)" />
@@ -105,6 +106,7 @@
         } catch (e) {}
         if (theme !== 'light' && theme !== 'dark') theme = 'light';
         document.documentElement.dataset.theme = theme;
+        document.getElementById('favicon').href = '/favicon-' + theme + '.svg';
       })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -40,12 +40,13 @@ const NOTES_APP: ProjectInfo = {
 const PLATFORMER: ProjectInfo = {
   title: '2D Platformer',
   description:
-    'A complete 2D platformer in Unity and C#. Pixel art made by hand in photoshop.',
+    'Complete 2D platformer in Unity and C#. Pixel art made by hand in photoshop.',
   links: [{ label: 'Source on GitHub', href: 'https://github.com/Steven404/2D-Platformer' }],
 };
 
 const LANGUAGE_TEACHER: ProjectInfo = {
   title: 'Language Teacher Portfolio',
+  description: 'Personal website & portfolio for a language teacher displaying their services and contact information ',
   links: [
     { label: 'Visit the live site', href: 'https://english-with-thalia.site/', primary: true },
     { label: 'Source on GitHub', href: 'https://github.com/Steven404/thalia-portfolio' },

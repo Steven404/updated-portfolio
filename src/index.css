@@ -299,14 +299,6 @@
   animation: revealUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
-.animate-delay-300 {
-  animation-delay: 300ms;
-}
-
-.animate-delay-800 {
-  animation-delay: 800ms;
-}
-
 .animate-wobble {
   animation: wobble 0.5s ease-in-out;
 }
@@ -325,10 +317,11 @@
 }
 
 /* ── Hero entrance ─────────────────────────────────────────────────
-   One sequence: the name rises out of a mask and its full stop lands, then
-   flies into the timeline and becomes the "now" dot (useFullStopJourney).
+   One sequence: the name is typed out, then the caret leaves it, shrinks
+   into a dot on its way into the timeline and becomes the "now" dot
+   (useCaretJourney).
    The timeline waits, paused, until then (`.is-playing`, `.is-docked` when
-   the full stop landed on it) and draws from now back to the first role,
+   the caret landed on it) and draws from now back to the first role,
    lighting each role as the line reaches it. `--at` is that moment:
    `--line-start` plus the role's measured `--reach`. */
 @keyframes heroFade {
@@ -336,14 +329,19 @@
   to   { opacity: 1; }
 }
 
-@keyframes heroNameRise {
-  from { transform: translateY(105%); }
-  to   { transform: translateY(0); }
+/* Typing: a letter stays unwritten until its moment; the caret shows only
+   between its own letter and the next one */
+@keyframes heroUnwritten {
+  from, to { color: transparent; }
 }
 
-@keyframes heroStop {
-  from { opacity: 0; transform: scale(0); }
-  to   { opacity: 1; transform: scale(1); }
+@keyframes heroCaret {
+  from, to { opacity: 1; }
+}
+
+@keyframes heroCaretBlink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
 }
 
 @keyframes heroLine {
@@ -377,24 +375,76 @@
   animation: heroFade 0.6s ease-out backwards;
 }
 
-/* Side room too: the negative tracking pulls the full stop's ink ~0.05em
-   past the line box, which the mask would otherwise clip */
-.hero-name-mask {
-  display: block;
-  overflow: hidden;
-  padding: 0 0.1em 0.1em;
-  margin: 0 -0.1em -0.1em;
-}
-
-.hero-name {
-  display: block;
-  animation: heroNameRise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.08s backwards;
-}
-
-.hero-stop {
+/* The name is typed. Every letter keeps its place from the start, so
+   nothing reflows; it is only unwritten (transparent) until its moment.
+   `--d` is when a letter appears and `--w` how long the caret then rests
+   after it, both set per letter in Hero. The caret is drawn by the letter
+   it follows, so it wraps with the name. */
+.hero-word {
   display: inline-block;
-  transform-origin: 50% 85%;
-  animation: heroStop 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.7s backwards;
+  white-space: nowrap;
+}
+
+.hero-char {
+  position: relative;
+  animation: heroUnwritten var(--d) linear;
+}
+
+.hero-char::before,
+.hero-char::after {
+  content: '';
+  position: absolute;
+  top: 0.04em;
+  width: max(2px, 0.05em);
+  height: 0.9em;
+  margin-left: calc(max(2px, 0.05em) / -2);
+  border-radius: 1px;
+  background-color: var(--accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hero-char::after {
+  left: 100%;
+  animation: heroCaret var(--w) linear var(--d);
+}
+
+/* Before the first letter: the caret blinks twice at the start of the line */
+.hero-char.is-first::before {
+  left: 0;
+  animation: heroCaretBlink calc(var(--d) / 2) linear 2;
+}
+
+/* After the last letter the caret stays until it leaves for the timeline
+   (useCaretJourney hides it then) */
+.hero-char.is-last::after {
+  animation: heroCaret 1ms linear var(--d) forwards;
+}
+
+.hero-char.is-last.caret-gone::after {
+  animation: none;
+  opacity: 0;
+}
+
+/* Around the name, in its order: the copy and the timeline's label rise as
+   the caret leaves the name (.is-named), the actions once it lands as the
+   "now" dot (.is-landed). useCaretJourney sets both on .hero, and sets them
+   at once when the visitor scrolls or presses anything in the header. */
+.hero-copy {
+  animation: revealUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.hero-label {
+  animation: heroFade 0.6s ease-out 120ms backwards;
+}
+
+.hero-actions {
+  animation: revealUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.hero:not(.is-named) :is(.hero-copy, .hero-label),
+.hero:not(.is-landed) .hero-actions {
+  animation-play-state: paused;
 }
 
 .hero-line {
@@ -417,7 +467,7 @@
   animation-play-state: paused;
 }
 
-/* The full stop is the "now" dot, so it is already there: no pop, and the
+/* The caret is the "now" dot, so it is already there: no pop, and the
    ripple fires on impact */
 .hero-timeline.is-docked {
   --ripple-lag: 0ms;
@@ -445,7 +495,7 @@
   animation: heroRipple 1.4s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--at) + var(--ripple-lag)) 2 both;
 }
 
-/* Positioned in document coordinates by useFullStopJourney; centred on its
+/* Positioned in document coordinates by useCaretJourney; centred on its
    transform origin. Below the sticky header. */
 .hero-traveller {
   position: absolute;
@@ -671,9 +721,24 @@ html:has(.dialog[open]) {
     transition: none;
   }
 
-  /* Hero: same order and timing, opacity only */
-  .hero-name,
-  .hero-stop,
+  /* Hero: same order and timing, opacity only. The name is not typed and
+     has no caret. */
+  .hero-char,
+  .hero-char::before,
+  .hero-char::after {
+    animation: none !important;
+  }
+
+  .hero-name {
+    animation: heroFade 0.4s ease-out 0.08s backwards;
+  }
+
+  .hero-copy,
+  .hero-label,
+  .hero-actions {
+    animation: heroFade 0.4s ease-out backwards;
+  }
+
   .hero-line,
   .hero-line-v,
   .hero-node,

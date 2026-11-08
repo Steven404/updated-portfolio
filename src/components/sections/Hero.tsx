@@ -1,7 +1,31 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { EXPERIENCE, type Role } from '../../data/experience';
-import { useFullStopJourney } from '../../hooks/useFullStopJourney';
+import { useCaretJourney } from '../../hooks/useCaretJourney';
 import { ButtonLink } from '../ui/ButtonLink';
+
+const NAME = 'Stefanos Michelakis';
+const CARET_LEAD = 600; // ms the caret blinks (twice) before the first letter
+const WORD_PAUSE = 140; // ms of extra hesitation at the space
+
+// When each letter of the name is typed: 45–75ms apart, unevenly, the way a
+// person types. Seeded so the server render and the client agree.
+const TYPED = (() => {
+  let seed = 7;
+  const jitter = () => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  let t = CARET_LEAD;
+  let i = 0;
+  return NAME.split(' ').map((word, w) =>
+    [...word].map((char, c) => {
+      if (i > 0) t += 45 + Math.round(jitter() * 30) + (w > 0 && c === 0 ? WORD_PAUSE : 0);
+      return { char, at: t, i: i++ };
+    })
+  );
+})();
+const LETTERS = TYPED.flat();
+
 import { RoleDialog } from './RoleDialog';
 
 interface ExperienceProps {
@@ -12,7 +36,7 @@ interface ExperienceProps {
 function Experience({ timelineRef, onOpenRole }: ExperienceProps) {
   return (
     <div ref={timelineRef} className="hero-timeline flex flex-col items-center w-full">
-      <h2 className="hero-fade inline-block pb-2 border-b-2 border-accent font-mono font-medium text-[13px] tracking-[0.08em] text-fg">
+      <h2 className="hero-label inline-block pb-2 border-b-2 border-accent font-mono font-medium text-[13px] tracking-[0.08em] text-fg">
         WORK EXPERIENCE
       </h2>
 
@@ -49,7 +73,7 @@ function Experience({ timelineRef, onOpenRole }: ExperienceProps) {
                   />
                 )}
                 {/* The whole entry opens the role details; the dot stays out of
-                    it, so the hover scale never moves what the full stop
+                    it, so the hover scale never moves what the caret
                     measures */}
                 <button
                   type="button"
@@ -86,7 +110,7 @@ function Experience({ timelineRef, onOpenRole }: ExperienceProps) {
 }
 
 export function Hero() {
-  const { stopRef, timelineRef } = useFullStopJourney();
+  const { caretRef, timelineRef } = useCaretJourney();
   // Kept after closing so the dialog's content stays put while it animates out
   const [role, setRole] = useState<Role | null>(null);
   const [roleOpen, setRoleOpen] = useState(false);
@@ -94,7 +118,7 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="max-w-[1200px] mx-auto px-6 pt-20 pb-[88px] flex flex-col items-center text-center gap-10"
+      className="hero max-w-[1200px] mx-auto px-6 pt-[70px] md:pt-20 pb-[88px] flex flex-col items-center text-center gap-10"
     >
       {/* Role, location + name */}
       <div className="flex flex-col items-center">
@@ -106,16 +130,43 @@ export function Hero() {
             Open to remote work
           </span>
         </div>
-        <h1 className="mt-5 font-display font-bold text-[clamp(44px,7vw,96px)] leading-none tracking-[-0.035em]">
-          <span className="hero-name-mask">
-            <span className="hero-name">
-              Stefanos Michelakis<span ref={stopRef} className="hero-stop text-accent">.</span>
-            </span>
+        {/* Typed out letter by letter; the caret it ends on becomes the "now"
+            dot in the timeline (useCaretJourney) */}
+        <h1
+          aria-label={NAME}
+          className="mt-5 font-display font-bold text-[clamp(44px,7vw,96px)] leading-none tracking-[-0.035em]"
+        >
+          <span className="hero-name block">
+            {TYPED.map((word, w) => (
+              <Fragment key={w}>
+                {w > 0 && ' '}
+                <span className="hero-word">
+                  {word.map(({ char, at, i }) => {
+                    const last = i === LETTERS.length - 1;
+                    return (
+                      <span
+                        key={i}
+                        ref={last ? caretRef : undefined}
+                        className={`hero-char${i === 0 ? ' is-first' : ''}${last ? ' is-last' : ''}`}
+                        style={
+                          {
+                            '--d': `${at}ms`,
+                            '--w': `${last ? 0 : LETTERS[i + 1].at - at}ms`,
+                          } as React.CSSProperties
+                        }
+                      >
+                        {char}
+                      </span>
+                    );
+                  })}
+                </span>
+              </Fragment>
+            ))}
           </span>
         </h1>
       </div>
 
-      <p className="animate-reveal-up animate-delay-300 max-w-[820px] text-[19px] sm:text-[22px] leading-[1.55] text-fg">
+      <p className="hero-copy max-w-[820px] text-[19px] sm:text-[22px] leading-[1.55] text-fg">
         I build React apps and React Native mobile products that ship to real users — with 5+ years
         of production experience and a relentless eye for the small details that make the difference.
       </p>
@@ -130,7 +181,7 @@ export function Hero() {
         />
       </div>
 
-      <div className="animate-reveal-up animate-delay-800 flex flex-wrap justify-center items-center gap-x-7 gap-y-4">
+      <div className="hero-actions flex flex-wrap justify-center items-center gap-x-7 gap-y-4">
         <ButtonLink href="#work">See my work →</ButtonLink>
         <a href="#contact" className="inline-flex items-center min-h-11 font-medium underline-offset-[6px]">
           Get in touch

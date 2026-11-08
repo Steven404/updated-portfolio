@@ -128,7 +128,7 @@ export function Header() {
           className={`font-display font-bold text-xl text-fg no-underline inline-block select-none ${isWobbling ? 'animate-wobble' : ''}`}
           aria-label="Back to top"
         >
-          SM<span className="text-accent">.</span>
+          SM
         </a>
 
         <div className="flex items-center gap-3">

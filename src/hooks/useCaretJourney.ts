@@ -1,17 +1,19 @@
 import { useEffect, useRef } from 'react';
 
-// The hero's full stop leaves the name, flies into the experience timeline
-// and becomes its "now" dot; the timeline then draws back from now to the
-// first role. If the "now" dot is off-screen, the full stop waits above the
-// bottom edge, follows the scroll and settles once the dot is in view.
-// The page holds still until the full stop departs, since scrolling it away
-// first would skip the journey; trying to scroll cuts the hold short.
-// Reduced motion, missing Web Animations support, or a full stop already
-// scrolled away fall back to playing the timeline when it comes into view.
+// The caret that typed the hero's name leaves it, condenses into a dot on
+// its way down into the experience timeline and becomes its "now" dot; the
+// timeline then draws back from now to the first role. If the "now" dot is
+// off-screen, the dot waits above the bottom edge, follows the scroll and
+// settles once the "now" dot is in view.
+// The page holds still until the caret departs, since scrolling it away
+// first would skip the journey; trying to scroll finishes the typing at once
+// and sends the caret off. Reduced motion, missing Web Animations support,
+// or a name already scrolled away fall back to playing the timeline when it
+// comes into view.
 
-const HOLD = 250; // ms the landed full stop rests before it departs
+const HOLD = 250; // ms the caret rests after the last letter before it departs
 const DOT = 13; // px, the "now" dot's diameter
-const WAIT_GAP = 28; // px above the viewport bottom where the full stop waits
+const WAIT_GAP = 28; // px above the viewport bottom where the dot waits
 const DOCK_MARGIN = 4; // px the "now" dot must clear the viewport bottom by to count as in view
 const FOLLOW = 0.18; // share of the remaining distance covered per frame while following
 const LINE_MS = { horizontal: 1000, vertical: 800 };
@@ -25,25 +27,18 @@ interface Point {
   y: number;
 }
 
-// Centre and size of the full stop's ink, in document coordinates. The span's
-// box is the glyph's advance and line box, so the ink is located from the
-// font's metrics.
-function inkOf(stop: HTMLElement) {
-  const box = stop.getBoundingClientRect();
-  const style = getComputedStyle(stop);
-  const ctx = document.createElement('canvas').getContext('2d');
-  if (!ctx) return null;
-  ctx.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-  const m = ctx.measureText('.');
-  const baseline =
-    box.top + m.fontBoundingBoxAscent + (box.height - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2;
-  return {
-    x: box.left + (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2 + scrollX,
-    y: baseline - (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2 + scrollY,
-    w: m.actualBoundingBoxRight + m.actualBoundingBoxLeft,
-    h: m.actualBoundingBoxAscent + m.actualBoundingBoxDescent,
-    top: box.top,
-  };
+// Centre and size of the caret, in document coordinates. It is the ::after
+// of the name's last letter, so it is located from that pseudo-element's
+// resolved geometry.
+function caretOf(host: HTMLElement) {
+  const box = host.getBoundingClientRect();
+  const caret = getComputedStyle(host, '::after');
+  const w = parseFloat(caret.width);
+  const h = parseFloat(caret.height);
+  const left = box.left + parseFloat(caret.left) + parseFloat(caret.marginLeft);
+  const top = box.top + parseFloat(caret.top);
+  if (![w, h, left, top].every(Number.isFinite)) return null;
+  return { x: left + w / 2 + scrollX, y: top + h / 2 + scrollY, w, h, top };
 }
 
 function centreOf(el: HTMLElement): Point {
@@ -125,20 +120,29 @@ function holdScroll(onAttempt: () => void) {
   return release;
 }
 
-export function useFullStopJourney() {
-  const stopRef = useRef<HTMLSpanElement>(null);
+export function useCaretJourney() {
+  const caretRef = useRef<HTMLSpanElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const stop = stopRef.current;
+    const host = caretRef.current;
     const timeline = timelineRef.current;
     const nowDot = timeline?.querySelector<HTMLElement>('[data-now-dot]');
-    if (!stop || !timeline || !nowDot) return;
+    const name = host?.closest<HTMLElement>('.hero-name');
+    const hero = host?.closest<HTMLElement>('.hero');
+    if (!host || !timeline || !nowDot || !name || !hero) return;
 
     const cleanups: Array<() => void> = [];
     let played = false;
 
+    // The rest of the hero follows the caret: the copy as it leaves the name,
+    // the actions once it lands
+    const named = () => hero.classList.add('is-named');
+    const landed = () => hero.classList.add('is-landed');
+    cleanups.push(() => hero.classList.remove('is-named', 'is-landed'));
+
     const play = (lineStart: number, docked: boolean) => {
+      landed();
       if (played) return;
       played = true;
       timeRoles(timeline);
@@ -150,6 +154,8 @@ export function useFullStopJourney() {
     // Fallback: play once the timeline is in view; straight away if it is in
     // view on load (after the name), almost at once if scrolled to later.
     const playInView = () => {
+      named();
+      landed();
       const mountedAt = performance.now();
       const observer = new IntersectionObserver(
         ([entry]) => {
@@ -164,7 +170,7 @@ export function useFullStopJourney() {
     };
 
     const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion || typeof stop.animate !== 'function') {
+    if (reduceMotion || typeof host.animate !== 'function') {
       playInView();
       return () => cleanups.forEach(fn => fn());
     }
@@ -172,9 +178,13 @@ export function useFullStopJourney() {
     let releaseScroll = () => {};
 
     const depart = () => {
+      named();
       // In flight, scrolling is followed rather than lost
       releaseScroll();
-      const ink = inkOf(stop);
+      const ink = caretOf(host);
+      // The caret goes either way: it leaves as the dot, or simply stops
+      host.classList.add('caret-gone');
+      cleanups.push(() => host.classList.remove('caret-gone'));
       const headerBottom = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0;
       if (!ink || ink.top < headerBottom || ink.top > innerHeight) {
         playInView();
@@ -188,7 +198,6 @@ export function useFullStopJourney() {
       traveller.append(body);
       document.body.append(traveller);
 
-      const hideStop = stop.animate([{ opacity: 0 }], { fill: 'forwards' });
       let frame = 0;
       let flight: Animation | null = null;
 
@@ -200,11 +209,10 @@ export function useFullStopJourney() {
       cleanups.push(() => {
         stopListening();
         flight?.cancel();
-        hideStop.cancel();
         traveller.remove();
       });
 
-      // Where the full stop should be: on the "now" dot whenever that is fully
+      // Where the dot should be: on the "now" dot whenever that is fully
       // in view (even just above the bottom edge, as on short phones), otherwise
       // waiting above the bottom edge in line with it.
       const target = () => {
@@ -217,14 +225,9 @@ export function useFullStopJourney() {
       const dock = () => {
         stopListening();
         play(0, true);
-        hideStop.cancel();
         // The real dot would show through the squash below; it takes over after
         const hideNow = nowDot.animate([{ opacity: 0 }], { fill: 'forwards' });
         cleanups.push(() => hideNow.cancel());
-        stop.animate([{ opacity: 0, transform: 'scale(0)' }, { opacity: 1, transform: 'scale(1)' }], {
-          duration: 380,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        });
         body
           .animate(
             [
@@ -271,11 +274,11 @@ export function useFullStopJourney() {
         arc(from, to).map(point => ({ transform: at(point) })),
         { duration, easing: 'cubic-bezier(0.45, 0, 0.2, 1)' }
       );
-      // Condense from the glyph into the "now" dot while lifting off
+      // Shrink from the caret's bar into the "now" dot while lifting off
       body.animate(
         [
-          { transform: `scale(${ink.w / DOT}, ${ink.h / DOT})` },
-          { transform: 'scale(1)', offset: 0.45 },
+          { transform: `scale(${ink.w / DOT}, ${ink.h / DOT})`, borderRadius: '1px' },
+          { transform: 'scale(1)', borderRadius: '50%', offset: 0.45 },
           { transform: 'scale(1)' },
         ],
         { duration, easing: 'ease-out' }
@@ -302,27 +305,33 @@ export function useFullStopJourney() {
       );
     };
 
-    // Depart once the name and its full stop have landed, so they are measured
-    // at rest
+    // Depart once the last letter is typed, with a beat for the caret to rest
     let cancelled = false;
+    let rushed = false;
     let timer = 0;
-    const name = stop.closest<HTMLElement>('.hero-name');
-    const entrance = [stop, name].flatMap(el => el?.getAnimations() ?? []);
-    Promise.all(entrance.map(animation => animation.finished)).then(
+    const typing = [...name.querySelectorAll<HTMLElement>('.hero-char')].flatMap(el => el.getAnimations());
+    Promise.all(typing.map(animation => animation.finished)).then(
       () => {
-        if (!cancelled) timer = window.setTimeout(depart, HOLD);
+        if (cancelled) return;
+        if (rushed) depart();
+        else timer = window.setTimeout(depart, HOLD);
       },
       () => {}
     );
     // Only while the name is on screen; a page opened further down scrolls freely.
-    // A scroll during the hold after the landing departs at once.
-    const heading = stop.closest('h1')?.getBoundingClientRect();
-    if (heading && heading.bottom > 0 && heading.top < innerHeight) {
+    // A scroll attempt finishes the typing (letters and carets) and departs at once.
+    const heading = name.getBoundingClientRect();
+    if (heading.bottom > 0 && heading.top < innerHeight) {
       releaseScroll = holdScroll(() => {
-        if (!timer) return;
-        clearTimeout(timer);
-        timer = 0;
-        depart();
+        landed();
+        if (timer) {
+          clearTimeout(timer);
+          timer = 0;
+          depart();
+        } else if (!rushed) {
+          rushed = true;
+          name.getAnimations({ subtree: true }).forEach(animation => animation.finish());
+        }
       });
     }
     cleanups.push(() => {
@@ -330,8 +339,33 @@ export function useFullStopJourney() {
       clearTimeout(timer);
       releaseScroll();
     });
-    return () => cleanups.forEach(fn => fn());
+
+    // Pressing anything in the header ends the intro on the spot: the journey
+    // is called off and every hero entrance jumps to its end, so the visitor
+    // is never waiting on it to go where they asked.
+    const header = document.querySelector('header');
+    let skipped = false;
+    const skip = (event: Event) => {
+      if (skipped || !(event.target instanceof Element) || !event.target.closest('a, button')) return;
+      skipped = true;
+      cleanups.splice(0).forEach(fn => fn());
+      host.classList.add('caret-gone');
+      named();
+      play(0, false);
+      [...hero.getAnimations({ subtree: true }), ...(header?.getAnimations({ subtree: true }) ?? [])].forEach(
+        animation => {
+          // An endless animation cannot finish; it is left running
+          if (animation.effect?.getComputedTiming().endTime !== Infinity) animation.finish();
+        }
+      );
+    };
+    header?.addEventListener('click', skip, true);
+
+    return () => {
+      header?.removeEventListener('click', skip, true);
+      cleanups.forEach(fn => fn());
+    };
   }, []);
 
-  return { stopRef, timelineRef };
+  return { caretRef, timelineRef };
 }

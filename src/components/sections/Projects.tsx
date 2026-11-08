@@ -56,14 +56,12 @@ const LANGUAGE_TEACHER: ProjectInfo = {
 function ProjectDetails({ project, large = false }: { project: ProjectInfo; large?: boolean }) {
   return (
     <div>
-      {/* The hero's accent full stop closes every project title */}
       <h3
         className={`font-display font-bold tracking-[-0.025em] text-balance ${
           large ? 'text-[clamp(32px,4vw,44px)] leading-[1.05]' : 'text-[30px] leading-[1.1]'
         }`}
       >
         {project.title}
-        <span className="text-accent">.</span>
       </h3>
       {project.description && (
         <p className={`mt-4 text-fg-2 text-pretty ${large ? 'text-lg max-w-[46ch]' : 'max-w-[52ch]'}`}>

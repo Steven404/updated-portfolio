@@ -1,4 +1,5 @@
 import { useScrollFadeIn } from '../../hooks/useScrollFadeIn';
+import { LinkArrow } from '../ui/LinkArrow';
 
 const SKILL_GROUPS = [
   { category: 'Mobile',       skills: ['React Native'] },
@@ -40,9 +41,10 @@ export function About() {
           <a
             href="/stefanos-michelakis-cv-english.pdf"
             download
-            className="mt-7 inline-flex items-center min-h-11 font-medium"
+            className="group no-underline mt-7 inline-flex items-center min-h-11 font-medium"
           >
-            Download resume (PDF) ↓
+            <span className="underline">Download resume (PDF)</span>
+            <LinkArrow direction="down">↓</LinkArrow>
           </a>
 
           <div className="mt-12">

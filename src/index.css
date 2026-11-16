@@ -704,6 +704,26 @@ html:has(.dialog[open]) {
   animation: revealUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
+/* Download arrow: drops out of the link, re-enters from above */
+@keyframes arrowDownThrough {
+  0%   { transform: translateY(0); opacity: 1; }
+  45%  { transform: translateY(0.7em); opacity: 0; }
+  46%  { transform: translateY(-0.7em); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.group:hover .link-arrow-down,
+.group:focus-visible .link-arrow-down {
+  animation: arrowDownThrough 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group:hover .link-arrow-down,
+  .group:focus-visible .link-arrow-down {
+    animation: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-reveal-up,
   .animate-fade-in-up,

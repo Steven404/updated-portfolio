@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useScrollFadeIn } from '../../hooks/useScrollFadeIn';
 import { useTheme } from '../../hooks/useTheme';
 import { ButtonLink } from '../ui/ButtonLink';
+import { LinkArrow } from '../ui/LinkArrow';
 import { ScreenshotCarousel, type Screenshot } from '../ui/ScreenshotCarousel';
 import { StoreDialog } from './StoreDialog';
 
@@ -100,11 +101,13 @@ function ProjectDetails({ project, large = false }: { project: ProjectInfo; larg
         {project.links.map(({ label, href, primary }) => {
           const content = (
             <>
-              {label} ↗<span className="sr-only">, {project.title} (opens in a new tab)</span>
+              <span className={primary ? undefined : 'underline underline-offset-4'}>{label}</span>
+              <LinkArrow direction="up-right">↗</LinkArrow>
+              <span className="sr-only">, {project.title} (opens in a new tab)</span>
             </>
           );
           return primary ? (
-            <ButtonLink key={href} href={href} target="_blank" rel="noopener noreferrer" variant="secondary">
+            <ButtonLink key={href} href={href} target="_blank" rel="noopener noreferrer" variant="secondary" className="group">
               {content}
             </ButtonLink>
           ) : (
@@ -113,7 +116,7 @@ function ProjectDetails({ project, large = false }: { project: ProjectInfo; larg
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center min-h-11 font-medium underline-offset-4"
+              className="group no-underline inline-flex items-center min-h-11 font-medium"
             >
               {content}
             </a>
@@ -176,9 +179,10 @@ export function Projects() {
             href="https://github.com/Steven404"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[15px] text-muted hover:text-accent"
+            className="group no-underline text-[15px] text-muted hover:text-accent"
           >
-            All projects on GitHub ↗
+            <span className="underline">All projects on GitHub</span>
+            <LinkArrow direction="up-right">↗</LinkArrow>
           </a>
         </div>
 

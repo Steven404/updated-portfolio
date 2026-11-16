@@ -182,7 +182,15 @@ export function Hero() {
       </div>
 
       <div className="hero-actions flex flex-wrap justify-center items-center gap-x-7 gap-y-4">
-        <ButtonLink href="#work">See my work →</ButtonLink>
+        <ButtonLink href="#work" className="group gap-1.5">
+          See my work
+          <span
+            aria-hidden="true"
+            className="inline-block transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+          >
+            →
+          </span>
+        </ButtonLink>
         <a href="#contact" className="inline-flex items-center min-h-11 font-medium underline-offset-[6px]">
           Get in touch
         </a>

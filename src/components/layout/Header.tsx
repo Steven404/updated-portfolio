@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Menu, Moon, Sun, X } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
+import { LinkArrow } from '../ui/LinkArrow';
 
 const NAV_LINKS = [
   { label: 'Work',    href: '#work' },
@@ -148,9 +149,9 @@ export function Header() {
             <a
               href={RESUME_HREF}
               download
-              className="no-underline inline-flex items-center min-h-11 px-[18px] py-2.5 rounded-full border border-line-strong"
+              className="group no-underline inline-flex items-center min-h-11 px-[18px] py-2.5 rounded-full border border-line-strong"
             >
-              Resume ↓
+              Resume<LinkArrow direction="down">↓</LinkArrow>
             </a>
           </div>
 
@@ -191,9 +192,9 @@ export function Header() {
             href={RESUME_HREF}
             download
             onClick={closeMenu}
-            className="mt-4 no-underline min-h-12 flex items-center justify-center rounded-full border border-line-strong text-base font-medium"
+            className="group mt-4 no-underline min-h-12 flex items-center justify-center rounded-full border border-line-strong text-base font-medium"
           >
-            Download resume ↓
+            Download resume<LinkArrow direction="down">↓</LinkArrow>
           </a>
         </div>
       )}

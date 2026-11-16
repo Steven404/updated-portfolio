@@ -1,8 +1,9 @@
-import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useScrollFadeIn } from '../../hooks/useScrollFadeIn';
 import { useTheme } from '../../hooks/useTheme';
 import { ButtonLink } from '../ui/ButtonLink';
 import { ScreenshotCarousel, type Screenshot } from '../ui/ScreenshotCarousel';
+import { StoreDialog } from './StoreDialog';
 
 interface ProjectLink {
   label: string;
@@ -15,6 +16,8 @@ interface ProjectInfo {
   title: string;
   description?: string;
   links: ProjectLink[];
+  /** Opens the store picker */
+  store?: { googlePlayUrl: string };
 }
 
 const NOTES_SHOT_ALTS = [
@@ -38,10 +41,14 @@ const NOTES_APP: ProjectInfo = {
 };
 
 const PLATFORMER: ProjectInfo = {
-  title: '2D Platformer',
+  title: '2D Pixel Adventure',
   description:
     'Complete 2D platformer in Unity and C#. Pixel art made by hand in photoshop.',
   links: [{ label: 'Source on GitHub', href: 'https://github.com/Steven404/2D-Platformer' }],
+  store: {
+    googlePlayUrl:
+      'https://play.google.com/store/apps/details?id=com.StefanosMichelakis.ConstantinesPixelAdventure',
+  },
 };
 
 const LANGUAGE_TEACHER: ProjectInfo = {
@@ -54,6 +61,8 @@ const LANGUAGE_TEACHER: ProjectInfo = {
 };
 
 function ProjectDetails({ project, large = false }: { project: ProjectInfo; large?: boolean }) {
+  const [storeOpen, setStoreOpen] = useState(false);
+
   return (
     <div>
       <h3
@@ -69,6 +78,25 @@ function ProjectDetails({ project, large = false }: { project: ProjectInfo; larg
         </p>
       )}
       <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+        {project.store && (
+          <>
+            <button
+              type="button"
+              onClick={() => setStoreOpen(true)}
+              aria-haspopup="dialog"
+              className="inline-flex items-center min-h-12 px-6 py-[13px] rounded-full border border-line-strong hover:border-dim font-medium cursor-pointer"
+            >
+              View in store
+              <span className="sr-only">, {project.title}</span>
+            </button>
+            <StoreDialog
+              gameTitle={project.title}
+              googlePlayUrl={project.store.googlePlayUrl}
+              open={storeOpen}
+              onClose={() => setStoreOpen(false)}
+            />
+          </>
+        )}
         {project.links.map(({ label, href, primary }) => {
           const content = (
             <>
@@ -117,7 +145,7 @@ function PlatformerVideo() {
       ref={videoRef}
       src="/images/platformer.mp4"
       poster="/images/platformer-poster.webp"
-      aria-label="Gameplay from the 2D platformer: a pixel-art character running and jumping across snow, rain and forest levels while collecting coins"
+      aria-label="Gameplay from 2D Pixel Adventure: a pixel-art character running and jumping across snow, rain and forest levels while collecting coins"
       autoPlay={!reduceMotion}
       controls={reduceMotion}
       muted

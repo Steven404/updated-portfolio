@@ -54,7 +54,7 @@ Voice: confident and specific, not self-promotional. First person, no buzzwords,
 - Work history: four roles, 2021 to now (Flarmio, Valmore Technologies, Kanellis Development Labs, Base Element), in `src/components/sections/Hero.tsx`.
 - Projects with source on GitHub (github.com/Steven404):
   - Offline Notes App (React Native): light and dark screenshots, `public/images/notes-{light,dark}-{1-4}.webp`.
-  - 2D Platformer (Unity, C#, hand-drawn pixel art): gameplay video and poster, `public/images/platformer.mp4`, `public/images/platformer-poster.webp`.
+  - 2D Pixel Adventure (Unity, C#, hand-drawn pixel art): gameplay video and poster, `public/images/platformer.mp4`, `public/images/platformer-poster.webp`.
   - Language Teacher Portfolio (Next.js): homepage screenshot, `public/images/language-teacher.webp`.
 - Resume PDF: `public/stefanos-michelakis-cv-english.pdf`.
 - Education: Computer Engineering (TEI of Eastern Macedonia and Thrace, Kavala); Michigan Certificate of Proficiency in English (C2).

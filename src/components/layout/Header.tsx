@@ -2,14 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { Menu, Moon, Sun, X } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { LinkArrow } from '../ui/LinkArrow';
+import { RESUME_HREF } from '../../data/resume';
 
 const NAV_LINKS = [
   { label: 'Work',    href: '#work' },
   { label: 'About',   href: '#about' },
   { label: 'Contact', href: '#contact' },
 ];
-
-const RESUME_HREF = '/stefanos-michelakis-cv-english.pdf';
 
 // A section is current once its top passes this share of the viewport height
 const ACTIVE_LINE = 0.4;

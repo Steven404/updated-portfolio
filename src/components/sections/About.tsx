@@ -1,5 +1,6 @@
 import { useScrollFadeIn } from '../../hooks/useScrollFadeIn';
 import { LinkArrow } from '../ui/LinkArrow';
+import { RESUME_HREF } from '../../data/resume';
 
 const SKILL_GROUPS = [
   { category: 'Mobile',       skills: ['React Native'] },
@@ -39,7 +40,7 @@ export function About() {
             polished interfaces in equal measure.
           </p>
           <a
-            href="/stefanos-michelakis-cv-english.pdf"
+            href={RESUME_HREF}
             download
             className="group no-underline mt-7 inline-flex items-center min-h-11 font-medium"
           >
